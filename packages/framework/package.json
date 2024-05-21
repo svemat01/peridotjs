@@ -1,0 +1,49 @@
+{
+  "name": "@peridotjs/framework",
+  "description": "",
+  "version": "0.0.1",
+  "author": "",
+  "dependencies": {
+    "@sapphire/discord-utilities": "^3.2.3",
+    "@sapphire/discord.js-utilities": "^7.2.1",
+    "@sapphire/lexure": "^1.1.7",
+    "@sapphire/result": "^2.6.6",
+    "@sapphire/stopwatch": "^1.5.2",
+    "@sapphire/utilities": "^3.15.3",
+    "i18next": "^23.11.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.3.0",
+    "@peridotjs/base": "workspace:*",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^20.12.12",
+    "eslint": "^9.2.0",
+    "eslint-plugin-simple-import-sort": "^12.1.0",
+    "eslint-plugin-unused-imports": "^3.2.0",
+    "pino": "^9.1.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.10.0"
+  },
+  "peerDependencies": {
+    "discord.js": "^14.15.2"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    },
+    "./resolvers": {
+      "import": "./src/resolvers/index.ts"
+    },
+    "./structures": {
+      "import": "./src/structures/index.ts"
+    }
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "src/index.ts",
+  "scripts": {
+    "lint": "eslint",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module"
+}

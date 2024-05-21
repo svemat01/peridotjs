@@ -1,0 +1,30 @@
+{
+  "name": "@peridotjs/root",
+  "description": "",
+  "version": "0.0.0",
+  "author": "",
+  "devDependencies": {
+    "syncpack": "^12.3.2"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "syncpack": {
+    "versionGroups": [
+      {
+        "label": "use workspace protocol for local packages",
+        "dependencies": [
+          "$LOCAL"
+        ],
+        "dependencyTypes": [
+          "!local"
+        ],
+        "pinVersion": "workspace:*"
+      }
+    ]
+  },
+  "type": "module"
+}
