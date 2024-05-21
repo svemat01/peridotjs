@@ -1,9 +1,9 @@
-import { userMention, type AutocompleteInteraction, type ClientEvents } from 'discord.js';
+import { Result } from '@sapphire/result';
+import { Stopwatch } from '@sapphire/stopwatch';
+import { type AutocompleteInteraction,userMention } from 'discord.js';
 
 import { container } from '../../../index.js';
 import { Events } from '../../events.js';
-import { Result } from '@sapphire/result';
-import { Stopwatch } from '@sapphire/stopwatch';
 
 export async function onPossibleAutocompleteInteraction(interaction: AutocompleteInteraction) {
     const { client, slashCommands } = container;
@@ -39,13 +39,15 @@ export async function onPossibleAutocompleteInteraction(interaction: Autocomplet
             command,
             interaction,
             logger,
+            duration,
+            result,
         });
 
         return duration;
     });
 
     result.inspectErr((error) =>
-        interaction.client.emit(Events.SlashCommandError, error, {
+        interaction.client.emit(Events.AutocompleteInteractionError, error, {
             command,
             interaction,
             logger,

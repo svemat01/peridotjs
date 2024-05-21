@@ -1,8 +1,8 @@
 {
     "extends": "@peridotjs/base/tsconfig.base.json",
-    "include": ["src", "eslint.config.js"],
+    "include": ["src"],
     "compilerOptions": {
         "outDir": "dist",
-        "noEmit": true,
+        "rootDir": "src",
     }
 }

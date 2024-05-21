@@ -761,8 +761,8 @@ declare module 'discord.js' {
         [PeridotEvents.TextCommandFinish]: [message: Message, command: TextCommand, payload: TextCommandFinishPayload];
 
         [PeridotEvents.PossibleAutocompleteInteraction]: [interaction: AutocompleteInteraction];
-        [PeridotEvents.AutocompleteInteractionError]: [error: unknown, payload: AutocompleteInteractionPayload];
-        [PeridotEvents.AutocompleteInteractionSuccess]: [payload: AutocompleteInteractionPayload];
+        [PeridotEvents.AutocompleteInteractionError]: [error: unknown, payload: AutocompleteInteractionErrorPayload];
+        [PeridotEvents.AutocompleteInteractionSuccess]: [payload: AutocompleteInteractionSuccessPayload];
 
         // Slash command chain
         [PeridotEvents.PossibleSlashCommand]: [interaction: ChatInputCommandInteraction];

@@ -4,13 +4,17 @@
   "version": "0.0.0",
   "author": "",
   "devDependencies": {
+    "@moonrepo/cli": "^1.24.6",
     "syncpack": "^12.3.2"
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.27.1"
   },
   "keywords": [],
   "license": "ISC",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "publish": "moon ci :build && changeset publish"
   },
   "syncpack": {
     "versionGroups": [

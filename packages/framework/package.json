@@ -1,7 +1,7 @@
 {
   "name": "@peridotjs/framework",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "author": "",
   "dependencies": {
     "@sapphire/discord-utilities": "^3.2.3",
@@ -9,8 +9,7 @@
     "@sapphire/lexure": "^1.1.7",
     "@sapphire/result": "^2.6.6",
     "@sapphire/stopwatch": "^1.5.2",
-    "@sapphire/utilities": "^3.15.3",
-    "i18next": "^23.11.4"
+    "@sapphire/utilities": "^3.15.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.3.0",
@@ -20,30 +19,31 @@
     "eslint": "^9.2.0",
     "eslint-plugin-simple-import-sort": "^12.1.0",
     "eslint-plugin-unused-imports": "^3.2.0",
-    "pino": "^9.1.0",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.10.0"
   },
   "peerDependencies": {
+    "i18next": "^23.11.4",
+    "pino": "^9.1.0",
     "discord.js": "^14.15.2"
   },
   "exports": {
     ".": {
-      "import": "./src/index.ts"
+      "import": "./dist/index.js"
     },
     "./resolvers": {
-      "import": "./src/resolvers/index.ts"
+      "import": "./dist/resolvers/index.js"
     },
     "./structures": {
-      "import": "./src/structures/index.ts"
+      "import": "./dist/structures/index.js"
     }
   },
   "keywords": [],
-  "license": "ISC",
-  "main": "src/index.ts",
+  "license": "MIT",
+  "main": "dist/index.js",
   "scripts": {
     "lint": "eslint",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.build.json"
   },
   "type": "module"
 }

@@ -1,0 +1,9 @@
+platform: node
+
+tasks:
+  build:
+    command: 'pnpm run build'
+    inputs:
+      - 'src/**/*'
+    outputs:
+      - 'dist'

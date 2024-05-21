@@ -94,8 +94,8 @@ async function resolveByLink(parameter: string, options: MessageResolverOptions)
     }
 
     return getMessageFromChannel(
-        channelId,
-        messageId,
+        channelId!,
+        messageId!,
         isAnyInteraction(options.messageOrInteraction) ? options.messageOrInteraction.user : options.messageOrInteraction.author,
     );
 }
@@ -108,8 +108,8 @@ async function resolveByChannelAndMessage(parameter: string, options: MessageRes
     }
 
     return getMessageFromChannel(
-        result.channelId,
-        result.messageId,
+        result.channelId!,
+        result.messageId!,
         isAnyInteraction(options.messageOrInteraction) ? options.messageOrInteraction.user : options.messageOrInteraction.author,
     );
 }
