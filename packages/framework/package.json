@@ -45,6 +45,12 @@
   "keywords": [],
   "license": "MIT",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
   "scripts": {
     "lint": "eslint",
     "build": "tsc -p tsconfig.build.json"
