@@ -2,7 +2,11 @@
   "name": "@peridotjs/base",
   "description": "",
   "version": "0.0.0",
-  "author": "",
+  "author": "Jakob Helgesson",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@sapphire/prettier-config": "^2.0.0",
     "@sapphire/ts-config": "^5.0.1",

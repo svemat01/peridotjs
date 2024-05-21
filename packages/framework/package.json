@@ -1,8 +1,12 @@
 {
   "name": "@peridotjs/framework",
   "description": "",
+  "author": "Jakob Helgesson",
   "version": "0.0.1",
-  "author": "",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@sapphire/discord-utilities": "^3.2.3",
     "@sapphire/discord.js-utilities": "^7.2.1",
