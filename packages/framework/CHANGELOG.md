@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.0.3
+
+### Patch Changes
+
+-   409a111: Fix build
+
 ## 0.0.2
 
 ### Patch Changes
