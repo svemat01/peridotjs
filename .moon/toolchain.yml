@@ -14,6 +14,10 @@ node:
   # Accepts "npm" (default), "pnpm", "yarn", or "bun".
   packageManager: 'pnpm'
 
+  # The version of the package manager (above) to use.
+  pnpm:
+    version: '9.0.0'
+
   # Add `node.version` as a constraint in the root `package.json` `engines`.
   addEnginesConstraint: false
 
