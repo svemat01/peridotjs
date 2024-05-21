@@ -4,6 +4,10 @@ tasks:
   build:
     command: 'pnpm run build'
     inputs:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'README.md'
+      - 'tsconfig.json'
       - 'src/**/*'
     outputs:
       - 'dist'
