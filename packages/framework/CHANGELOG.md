@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.1.2
+
+### Patch Changes
+
+-   fe1224c: Make i18n optional
+
 ## 0.1.1
 
 ### Patch Changes
