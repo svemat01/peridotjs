@@ -1,4 +1,4 @@
-import type { IArgument } from '../arguments/Argument.js';
+import type { IArgument } from '../arguments/types.js';
 import { UserError } from './UserError.js';
 
 /**

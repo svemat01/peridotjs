@@ -3,13 +3,14 @@ import type { StageChannel } from 'discord.js';
 import { Identifiers } from '../../errors/Identifiers.js';
 import { resolveGuildStageVoiceChannel } from '../../resolvers/guildStageVoiceChannel.js';
 import { Argument } from '../Argument.js';
+import type { ArgumentContext, ArgumentResult } from '../types.js';
 
 export class CoreGuildStageVoiceChannel extends Argument<StageChannel> {
     public constructor() {
         super({ name: 'guildStageVoiceChannel' });
     }
 
-    public run(parameter: string, context: Argument.Context): Argument.Result<StageChannel> {
+    public run(parameter: string, context: ArgumentContext): ArgumentResult<StageChannel> {
         const { guild } = context.message;
         if (!guild) {
             return this.error({

@@ -23,8 +23,8 @@ import { ArgumentError } from '../errors/ArgumentError.js';
 import { Identifiers } from '../errors/Identifiers.js';
 import { UserError } from '../errors/UserError.js';
 import type { EmojiObject } from '../resolvers/emoji.js';
-import type { Argument, IArgument } from './Argument.js';
 import { argumentResolvers } from './resolvers/index.js';
+import type { ArgumentContext, ArgumentResult, IArgument } from './types.js';
 
 /**
  * The argument parser to be used in {@link Command}.
@@ -393,7 +393,7 @@ export class Args {
      * ); // HELLO
      * ```
      */
-    public async peekResult<T>(type: () => Argument.Result<T>): Promise<ResultType<T>>;
+    public async peekResult<T>(type: () => ArgumentResult<T>): Promise<ResultType<T>>;
 
     /**
      * Peeks the following parameter(s) without advancing the parser's state.
@@ -438,12 +438,12 @@ export class Args {
      * ```
      */
     public async peekResult<K extends keyof ArgType>(
-        type: (() => Awaitable<Argument.Result<ArgType[K]>>) | K,
+        type: (() => Awaitable<ArgumentResult<ArgType[K]>>) | K,
         options?: ArgOptions,
     ): Promise<ResultType<ArgType[K]>>;
 
     public async peekResult<K extends keyof ArgType>(
-        type: (() => Awaitable<Argument.Result<ArgType[K]>>) | K,
+        type: (() => Awaitable<ArgumentResult<ArgType[K]>>) | K,
         options: ArgOptions = {},
     ): Promise<ResultType<ArgType[K]>> {
         this.save();
@@ -473,7 +473,7 @@ export class Args {
      * await message.channel.send(`First bigint squared: ${first**2n}`); // First bigint squared: 625
      * ```
      */
-    public async peek<T>(type: () => Argument.Result<T>): Promise<T>;
+    public async peek<T>(type: () => ArgumentResult<T>): Promise<T>;
     /**
      * Similar to {@link Args.peekResult} but returns the value on success, throwing otherwise.
      * @param type The function, custom argument, or argument name.
@@ -519,9 +519,9 @@ export class Args {
      * await message.channel.send(`Hostname: ${url.hostname}`); // Hostname: discord.com
      * ```
      */
-    public async peek<K extends keyof ArgType>(type: (() => Argument.Result<ArgType[K]>) | K, options?: ArgOptions): Promise<ArgType[K]>;
+    public async peek<K extends keyof ArgType>(type: (() => ArgumentResult<ArgType[K]>) | K, options?: ArgOptions): Promise<ArgType[K]>;
 
-    public async peek<K extends keyof ArgType>(type: (() => Argument.Result<ArgType[K]>) | K, options?: ArgOptions): Promise<ArgType[K]> {
+    public async peek<K extends keyof ArgType>(type: (() => ArgumentResult<ArgType[K]>) | K, options?: ArgOptions): Promise<ArgType[K]> {
         const result = await this.peekResult(type, options);
         return result.unwrapRaw();
     }
@@ -829,7 +829,7 @@ export type ArgType = {
     enum: string;
 };
 
-export type ArgOptions = NonNullable<unknown> & Omit<Argument.Context, 'message' | 'command'>;
+export type ArgOptions = NonNullable<unknown> & Omit<ArgumentContext, 'message' | 'command'>;
 
 export type RepeatArgOptions = {
     /**

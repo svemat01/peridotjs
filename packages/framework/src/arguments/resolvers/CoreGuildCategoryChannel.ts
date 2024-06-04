@@ -3,13 +3,14 @@ import type { CategoryChannel } from 'discord.js';
 import { Identifiers } from '../../errors/Identifiers.js';
 import { resolveGuildCategoryChannel } from '../../resolvers/guildCategoryChannel.js';
 import { Argument } from '../Argument.js';
+import type { ArgumentContext, ArgumentResult } from '../types.js';
 
 export class CoreGuildCategoryChannel extends Argument<CategoryChannel> {
     public constructor() {
         super({ name: 'guildCategoryChannel' });
     }
 
-    public run(parameter: string, context: Argument.Context): Argument.Result<CategoryChannel> {
+    public run(parameter: string, context: ArgumentContext): ArgumentResult<CategoryChannel> {
         const { guild } = context.message;
         if (!guild) {
             return this.error({

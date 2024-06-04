@@ -1,5 +1,5 @@
 import type { MessageResolverOptions } from '../resolvers/message.js';
-import type { Argument } from './Argument.js';
+import type { ArgumentContext } from './types.js';
 
 /**
  * The context for the `'enum'` argument.
@@ -8,7 +8,7 @@ import type { Argument } from './Argument.js';
 export type EnumArgumentContext = {
     readonly enum?: string[];
     readonly caseInsensitive?: boolean;
-} & Argument.Context;
+} & ArgumentContext;
 
 /**
  * The context for the `'boolean'` argument.
@@ -31,7 +31,7 @@ export type BooleanArgumentContext = {
      * ```
      */
     readonly falses?: string[];
-} & Argument.Context;
+} & ArgumentContext;
 
 /**
  * The context for the `'member'` argument.
@@ -44,10 +44,10 @@ export type MemberArgumentContext = {
      * @default true
      */
     readonly performFuzzySearch?: boolean;
-} & Argument.Context;
+} & ArgumentContext;
 
 /**
  * The context for the `'message'` argument.
  * @since 4.2.0 (🌿)
  */
-export type MessageArgumentContext = Omit<MessageResolverOptions, 'messageOrInteraction'> & Argument.Context;
+export type MessageArgumentContext = Omit<MessageResolverOptions, 'messageOrInteraction'> & ArgumentContext;

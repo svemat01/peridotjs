@@ -1,5 +1,5 @@
-import type { IArgument } from '../Argument.js';
 import type { ArgType } from '../Parser.js';
+import type { IArgument } from '../types.js';
 import { CoreBoolean } from './CoreBoolean.js';
 import { CoreChannel } from './CoreChannel.js';
 import { CoreDate } from './CoreDate.js';

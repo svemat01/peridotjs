@@ -4,13 +4,14 @@ import { Identifiers } from '../../errors/Identifiers.js';
 import { resolveMember } from '../../resolvers/member.js';
 import { Argument } from '../Argument.js';
 import type { MemberArgumentContext } from '../Contexts.js';
+import type { AsyncArgumentResult } from '../types.js';
 
 export class CoreMember extends Argument<GuildMember> {
     public constructor() {
         super({ name: 'member' });
     }
 
-    public async run(parameter: string, context: MemberArgumentContext): Argument.AsyncResult<GuildMember> {
+    public async run(parameter: string, context: MemberArgumentContext): AsyncArgumentResult<GuildMember> {
         const { guild } = context.message;
 
         if (!guild) {

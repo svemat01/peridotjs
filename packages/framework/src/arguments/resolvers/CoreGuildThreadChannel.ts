@@ -3,13 +3,14 @@ import type { ThreadChannel } from 'discord.js';
 import { Identifiers } from '../../errors/Identifiers.js';
 import { resolveGuildThreadChannel } from '../../resolvers/guildThreadChannel.js';
 import { Argument } from '../Argument.js';
+import type { ArgumentContext, ArgumentResult } from '../types.js';
 
 export class CoreGuildThreadChannel extends Argument<ThreadChannel> {
     public constructor() {
         super({ name: 'guildThreadChannel' });
     }
 
-    public run(parameter: string, context: Argument.Context): Argument.Result<ThreadChannel> {
+    public run(parameter: string, context: ArgumentContext): ArgumentResult<ThreadChannel> {
         const { guild } = context.message;
         if (!guild) {
             return this.error({

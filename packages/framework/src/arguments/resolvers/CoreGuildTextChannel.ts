@@ -3,13 +3,14 @@ import type { TextChannel } from 'discord.js';
 import { Identifiers } from '../../errors/Identifiers.js';
 import { resolveGuildTextChannel } from '../../resolvers/guildTextChannel.js';
 import { Argument } from '../Argument.js';
+import type { ArgumentContext, ArgumentResult } from '../types.js';
 
 export class CoreGuildTextChannel extends Argument<TextChannel> {
     public constructor() {
         super({ name: 'guildTextChannel' });
     }
 
-    public run(parameter: string, context: Argument.Context): Argument.Result<TextChannel> {
+    public run(parameter: string, context: ArgumentContext): ArgumentResult<TextChannel> {
         const { guild } = context.message;
         if (!guild) {
             return this.error({
