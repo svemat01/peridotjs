@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.1.1
+
+### Patch Changes
+
+-   af3866d: Fix circular imports for arguments
+
 ## 0.1.0
 
 ### Minor Changes
