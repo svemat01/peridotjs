@@ -26,14 +26,15 @@ export async function onPossibleAutocompleteInteraction(interaction: Autocomplet
         const stopwatch = new Stopwatch();
         const result = await command.autocomplete!(interaction, {
             logger,
-            i18n: container.i18n.cloneInstance({
-                interpolation: {
-                    defaultVariables: {
-                        authorUsername: interaction.user.username,
-                        authorMention: userMention(interaction.user.id),
+            i18n: () =>
+                container.i18n.cloneInstance({
+                    interpolation: {
+                        defaultVariables: {
+                            authorUsername: interaction.user.username,
+                            authorMention: userMention(interaction.user.id),
+                        },
                     },
-                },
-            }),
+                }),
         });
         const { duration } = stopwatch.stop();
 

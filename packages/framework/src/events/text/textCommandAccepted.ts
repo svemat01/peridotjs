@@ -27,7 +27,7 @@ export async function onTextCommandAccepted(payload: TextCommandAcceptedPayload)
         const result = await command.run(message, {
             args,
             logger,
-            i18n: container.i18n.cloneInstance({
+            i18n: () => container.i18n.cloneInstance({
                 interpolation: {
                     defaultVariables: {
                         authorUsername: message.author.username,

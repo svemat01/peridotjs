@@ -3,8 +3,7 @@ import { Stopwatch } from '@sapphire/stopwatch';
 import { userMention } from 'discord.js';
 
 import { container } from '../../../structures/container.js';
-import { type ButtonInteractionAcceptedPayload,Events } from '../../index.js';
-
+import { type ButtonInteractionAcceptedPayload, Events } from '../../index.js';
 
 export async function onButtonInteractionAccepted(payload: ButtonInteractionAcceptedPayload) {
     const { interaction, component, logger } = payload;
@@ -17,14 +16,15 @@ export async function onButtonInteractionAccepted(payload: ButtonInteractionAcce
         const stopwatch = new Stopwatch();
         const result = await component.run(interaction, {
             logger,
-            i18n: container.i18n.cloneInstance({
-                interpolation: {
-                    defaultVariables: {
-                        authorUsername: interaction.user.username,
-                        authorMention: userMention(interaction.user.id),
+            i18n: () =>
+                container.i18n.cloneInstance({
+                    interpolation: {
+                        defaultVariables: {
+                            authorUsername: interaction.user.username,
+                            authorMention: userMention(interaction.user.id),
+                        },
                     },
-                },
-            }),
+                }),
         });
         const { duration } = stopwatch.stop();
 

@@ -12,7 +12,7 @@ export type CommandResult =
 
 export type CommonContext = {
     logger: Logger;
-    i18n: i18n;
+    i18n: () => i18n;
 };
 
 declare module 'i18next' {
