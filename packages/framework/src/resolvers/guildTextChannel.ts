@@ -3,7 +3,7 @@ import type { Result } from '@sapphire/result';
 import type { Guild, TextChannel } from 'discord.js';
 
 import { Identifiers } from '../errors/Identifiers.js';
-import { resolveGuildChannelPredicate } from '../structures/resolvers/resolveGuildChannelPredicate.js';
+import { resolveGuildChannelPredicate } from './resolveGuildChannelPredicate.js';
 
 export function resolveGuildTextChannel(
     parameter: string,

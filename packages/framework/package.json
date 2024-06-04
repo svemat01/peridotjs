@@ -16,6 +16,7 @@
     "@sapphire/utilities": "^3.15.3"
   },
   "devDependencies": {
+    "@discordjs/docgen": "^0.12.1",
     "@eslint/js": "^9.3.0",
     "@peridotjs/base": "workspace:*",
     "@types/eslint__js": "^8.42.3",
@@ -27,33 +28,28 @@
     "typescript-eslint": "^7.10.0"
   },
   "peerDependencies": {
+    "discord.js": "^14.15.2",
     "i18next": "^23.11.4",
-    "pino": "^9.1.0",
-    "discord.js": "^14.15.2"
+    "pino": "^9.1.0"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js"
-    },
-    "./resolvers": {
-      "import": "./dist/resolvers/index.js"
-    },
-    "./structures": {
-      "import": "./dist/structures/index.js"
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
     }
   },
   "keywords": [],
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "files": [
-    "dist",
+    "dist/src",
     "README.md",
     "CHANGELOG.md",
     "package.json"
   ],
   "scripts": {
     "lint": "eslint",
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.json"
   },
   "type": "module"
 }

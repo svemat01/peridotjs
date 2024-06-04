@@ -1,7 +1,17 @@
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { isCmdExport } from '../index.js';
+import type { ClientEvents } from 'discord.js';
+
+import {
+    type ButtonComponent,
+    type ClientEvent,
+    type ContextMenuCommand,
+    type ModalComponent,
+    type SelectMenuComponent,
+    type SlashCommand,
+    type TextCommand,
+} from '../index.js';
 import { container } from './container.js';
 
 /**
@@ -10,7 +20,9 @@ import { container } from './container.js';
 export type StructurePredicate<T> = (structure: unknown) => structure is T;
 
 /**
- * Loads all the structures in the provided directory
+ * Loads all the structures in the provided directory matching the predicate.
+ *
+ * **Ignores non .ts files, index.ts files, and files ending with .lib.ts.**
  *
  * @param dir - The directory to load the structures from
  * @param predicate - The predicate to check if the structure is valid
@@ -18,7 +30,9 @@ export type StructurePredicate<T> = (structure: unknown) => structure is T;
  * @returns
  */
 export async function loadStructures<T>(dir: string, predicate: StructurePredicate<T>, recursive = true): Promise<T[]> {
-    console.log('Loading structures from', dir);
+    const { logger } = container;
+
+    logger.trace({ dir }, 'Loading structures');
     // Get the stats of the directory
     const statDir = await stat(dir);
 
@@ -35,7 +49,8 @@ export async function loadStructures<T>(dir: string, predicate: StructurePredica
 
     // Loop through all the files in the directory
     for (const file of files) {
-        console.log('Loading file', file);
+        // console.log('Loading file', file);
+        logger.trace({ dir, file }, 'Loading file');
 
         // Get the stats of the file
         const statFile = await stat(join(dir.toString(), file));
@@ -61,34 +76,104 @@ export async function loadStructures<T>(dir: string, predicate: StructurePredica
     return structures;
 }
 
-export async function loadCmdExports(dir: string, recursive = true, overwrite = true) {
-    console.log('Loading commands from', dir);
-    const _exports = await loadStructures(dir, isCmdExport, recursive);
+/**
+ * Represents the export structure for a handler.
+ */
+export type HandlerExport = {
+    text?: TextCommand[];
+    slash?: SlashCommand[];
+    contextMenu?: ContextMenuCommand[];
+    buttons?: ButtonComponent[];
+    modals?: ModalComponent[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    selectMenus?: SelectMenuComponent<any>[];
+    clientEvents?: ClientEvent<keyof ClientEvents>[];
+    __brand: 'HandlerExport';
+};
+
+/**
+ * Helper function to create a handler export object.
+ *
+ * @param handlerExport - The handler export object to create.
+ * @returns The created handler export object.
+ */
+export const createHandlerExport = (handlerExport: Omit<HandlerExport, '__brand'>) => {
+    return {
+        ...handlerExport,
+        __brand: 'HandlerExport' as const,
+    };
+};
+
+/**
+ * Checks if the given value is a valid handler export.
+ *
+ * @param handlerExport - The value to check.
+ * @returns True if the value is a valid handler export, false otherwise.
+ */
+export const isHandlerExport = (handlerExport: unknown): handlerExport is HandlerExport =>
+    typeof handlerExport === 'object' && handlerExport !== null && (handlerExport as HandlerExport)?.__brand === 'HandlerExport';
+
+/**
+ * Loads and exports handlers from the specified directory.
+ *
+ * @param dir - The directory to load handlers from.
+ * @param recursive - Optional. Specifies whether to load handlers recursively. Default is true.
+ * @param overwrite - Optional. Specifies whether to overwrite existing handlers. Default is true.
+ * @returns A promise that resolves when the handlers are loaded and exported.
+ */
+export async function loadHandlerExports(dir: string, recursive = true, overwrite = true) {
+    const { handlers, logger } = container;
+
+    logger.debug({ dir }, 'Loading handlers from');
+
+    const _exports = await loadStructures(dir, isHandlerExport, recursive);
 
     if (overwrite) {
-        container.textCommands.clear();
-        container.slashCommands.clear();
-        container.contextMenuCommands.clear();
-        container.buttons = [];
-        container.modals = [];
-        container.selectMenus = [];
+        handlers.textCommands.clear();
+        handlers.slashCommands.clear();
+        handlers.contextMenuCommands.clear();
+        handlers.buttons = [];
+        handlers.modals = [];
+        handlers.selectMenus = [];
+
+        for (const [name, events] of handlers.clientEvents) {
+            for (const event of events) {
+                container.client.off(name, event.run);
+            }
+        }
+
+        handlers.clientEvents.clear();
     }
 
     for (const _export of _exports) {
         for (const text of _export.text ?? []) {
-            container.textCommands.set(text.data.name, text);
+            handlers.textCommands.set(text.data.name, text);
         }
 
         for (const slash of _export.slash ?? []) {
-            container.slashCommands.set(slash.data.name, slash);
+            handlers.slashCommands.set(slash.data.name, slash);
         }
 
         for (const contextMenu of _export.contextMenu ?? []) {
-            container.contextMenuCommands.set(contextMenu.data.name, contextMenu);
+            handlers.contextMenuCommands.set(contextMenu.data.name, contextMenu);
         }
 
-        container.buttons.push(...(_export.buttons ?? []));
-        container.modals.push(...(_export.modals ?? []));
-        container.selectMenus.push(...(_export.selectMenus ?? []));
+        for (const event of _export.clientEvents ?? []) {
+            const events = handlers.clientEvents.get(event.name) ?? new Set();
+            events.add(event);
+            handlers.clientEvents.set(event.name, events);
+
+            if (event.type === 'on') {
+                container.client.on(event.name, event.run);
+            } else {
+                container.client.once(event.name, event.run);
+            }
+        }
+
+        handlers.buttons.push(...(_export.buttons ?? []));
+        handlers.modals.push(...(_export.modals ?? []));
+        handlers.selectMenus.push(...(_export.selectMenus ?? []));
     }
+
+    logger.debug({dir}, 'Loaded handlers from');
 }

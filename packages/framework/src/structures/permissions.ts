@@ -1,34 +1,76 @@
 import type { GuildMember, Snowflake } from 'discord.js';
 
+/**
+ * Represents the permission levels for a user.
+ */
 export enum PermissionLevel {
+    /**
+     * The owner permission level.
+     */
     OWNER = 4,
+
+    /**
+     * The administrator permission level.
+     */
     ADMINISTRATOR = 3,
+
+    /**
+     * The moderator permission level.
+     */
     MODERATOR = 2,
+
+    /**
+     * The regular user permission level.
+     */
     REGULAR = 1,
+
+    /**
+     * The blocked user permission level.
+     */
     BLOCKED = 0,
 }
 
+/**
+ * Represents the configuration for permission levels.
+ * 
+ * @example
+ * ```typescript
+ * {
+ *   global: {
+ *     'USER_ID_1': PermissionLevel.ADMINISTRATOR, // Has administrator permissions globally
+ *   },
+ *   guilds: {
+ *     'GUILD_ID_1': {
+ *         'USER_ID_2': PermissionLevel.ADMINISTRATOR, // Has administrator permissions in GUILD_ID_1
+ *     },
+ *  },
+ * ```
+ */
 export type PermissionLevelConfig = {
     /**
-     * The global permission level for each user
-     *
+     * The global permission level for each user.
+     * 
      * User ID -> Permission Level
      */
     global: Record<Snowflake, PermissionLevel>;
+    
     /**
-     * The permission level map for each guild
-     *
+     * The permission level map for each guild.
+     * 
      * Guild ID -> Role ID -> Permission Level
      */
     guilds: Record<Snowflake, Record<Snowflake, PermissionLevel>>;
 };
 
+/**
+ * Retrieves the permission level for a given member based on the provided configuration.
+ * @param member - The guild member for whom to retrieve the permission level.
+ * @param config - The configuration object containing global and guild-specific permission levels.
+ * @returns The permission level of the member.
+ */
 export const getPermissionLevel = (
     member: GuildMember | null,
-    config: {
-        global: Record<string, PermissionLevel>;
-        guilds: Record<string, Record<string, PermissionLevel>>;
-    },
+    config: PermissionLevelConfig,
 ): PermissionLevel => {
     if (!member) return PermissionLevel.REGULAR; // Return Regular perm if no member
 
@@ -47,6 +89,13 @@ export const getPermissionLevel = (
 
 const greaterThan = (a: number, b: number) => (a > b ? a : b);
 
+/**
+ * Returns the permission level based on the given role IDs, default role, and ID-to-Role map.
+ * @param rolesIds - An array of role IDs.
+ * @param defaultRole - The default permission level.
+ * @param IDRoleMap - A map of role IDs to permission levels.
+ * @returns The calculated permission level.
+ */
 export const _getPermissionLevel = (
     rolesIds: string[],
     defaultRole: PermissionLevel,

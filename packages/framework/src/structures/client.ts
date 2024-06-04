@@ -71,7 +71,7 @@ export type PeridotClientOptions = {
     i18n: i18n | undefined;
 
     /**
-     * Controls whether the bot will automatically appear to be typing when a command is accepted.
+     * Controls whether the bot will automatically appear to be typing when a text command is accepted.
      * @default false
      */
     typing?: boolean;
@@ -86,24 +86,6 @@ export type PeridotClientOptions = {
      * @default false
      */
     disableMentionPrefix?: boolean;
-
-    /**
-     * Whenever starting the bot process Peridot may report errors when failing to fetch guild commands.
-     * One of the causes for this can be when a bot was invited to a server without the `application.commands` scope.
-     *
-     * Normally this produce a log in the console at the WARN level, however because bot lists have a tendency to invite your
-     * bot specifically without the scope to ensure that your Chat Input and Context Menu commands do not show up as usable commands
-     * in that server, you may want to include their guild ids in this list.
-     *
-     * By adding ids to this list, whenever a guild id matches one of the ids in the list no warning log message will be emitted for that guild.
-     *
-     * By setting this value to `true`, no warning log message will be emitted for any guilds we couldn't fetch the commands from.
-     *
-     * Note that this specifically applies to the warning log:
-     *
-     * > ApplicationCommandRegistries: Failed to fetch guild commands for guild \<guild name\> (\<guild id\>). Make sure to authorize your application with the "applications.commands" scope in that guild.
-     */
-    preventFailedToFetchLogForGuilds?: string[] | true;
 
     permissionConfig: PermissionLevelConfig;
 };
@@ -131,26 +113,6 @@ export type PeridotClientOptions = {
  *
  * client.login(process.env.DISCORD_TOKEN)
  *   .catch(console.error);
- * ```
- *
- * @example
- * ```typescript
- * // Automatically scan from a specific directory, e.g. the main
- * // file is at `/home/me/bot/index.js` and all your pieces are at
- * // `/home/me/bot/pieces` (e.g. `/home/me/bot/pieces/commands/MyCommand.js`):
- * const client = new PeridotClient({
- *   baseUserDirectory: join(__dirname, 'pieces'),
- *   // More options...
- * });
- * ```
- *
- * @example
- * ```typescript
- * // Opt-out automatic scanning:
- * const client = new PeridotClient({
- *   baseUserDirectory: null,
- *   // More options...
- * });
  * ```
  */
 export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready> {
@@ -225,14 +187,6 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
         });
     }
 }
-
-// export interface CooldownOptions {
-// 	scope?: BucketScope;
-// 	delay?: number;
-// 	limit?: number;
-// 	filteredUsers?: Snowflake[];
-// 	filteredCommands?: string[];
-// }
 
 declare module 'discord.js' {
     interface Client {

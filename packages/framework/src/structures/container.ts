@@ -1,19 +1,22 @@
-import type { Client, SelectMenuType } from 'discord.js';
+import type { Client, ClientEvents, SelectMenuType } from 'discord.js';
 import type { i18n } from 'i18next';
 import type { Logger } from 'pino';
 
-import type { TextCommand } from '../command/TextCommand.js';
-import type { SelectMenuComponent } from '../components/SelectMenuComponent.js';
-import type { ButtonComponent, ContextMenuCommand, ModalComponent, SlashCommand } from '../index.js';
+import type { SelectMenuComponent } from '../handlers/SelectMenuComponent.js';
+import type { TextCommand } from '../handlers/TextCommand.js';
+import type { ButtonComponent, ClientEvent, ContextMenuCommand, ModalComponent, SlashCommand } from '../index.js';
 import type { PermissionLevelConfig } from './permissions.js';
-
-class Container {
+class HandlerContainer {
     public textCommands: Map<string, TextCommand> = new Map();
     public slashCommands: Map<string, SlashCommand> = new Map();
     public contextMenuCommands: Map<string, ContextMenuCommand> = new Map();
     public buttons: ButtonComponent[] = [];
     public modals: ModalComponent[] = [];
     public selectMenus: SelectMenuComponent<SelectMenuType>[] = [];
+    public clientEvents: Map<string, Set<ClientEvent<keyof ClientEvents>>> = new Map();
+}
+class Container {
+    public handlers = new HandlerContainer();
     public _i18n: i18n | undefined = undefined;
 
     public permissionConfig: PermissionLevelConfig = {
