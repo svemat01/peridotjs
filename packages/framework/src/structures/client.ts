@@ -76,11 +76,6 @@ export type PeridotClientOptions = {
      */
     typing?: boolean;
 
-    // /**
-    //  * Sets the default cooldown time for all commands.
-    //  * @default "No cooldown options"
-    //  */
-    // defaultCooldown?: CooldownOptions;
     /**
      * Controls whether the bot has mention as a prefix disabled
      * @default false

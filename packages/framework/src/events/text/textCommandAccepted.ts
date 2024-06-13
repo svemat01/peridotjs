@@ -27,14 +27,19 @@ export async function onTextCommandAccepted(payload: TextCommandAcceptedPayload)
         const result = await command.run(message, {
             args,
             logger,
-            i18n: () => container.i18n.cloneInstance({
-                interpolation: {
-                    defaultVariables: {
-                        authorUsername: message.author.username,
-                        authorMention: userMention(message.author.id),
+            get i18n() {
+                // @ts-expect-error Hack to make it a lazy value
+                delete this.i18n;
+                this.i18n = container.i18n.cloneInstance({
+                    interpolation: {
+                        defaultVariables: {
+                            authorUsername: message.author.username,
+                            authorMention: userMention(message.author.id),
+                        },
                     },
-                },
-            }),
+                });
+                return this.i18n;
+            },
         });
         const { duration } = stopwatch.stop();
 

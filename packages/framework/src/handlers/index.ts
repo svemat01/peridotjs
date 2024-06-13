@@ -12,7 +12,11 @@ export type CommandResult =
 
 export type CommonContext = {
     logger: Logger;
-    i18n: () => i18n;
+    /**
+     * The i18n instance for this interaction.
+     * @throws If accessed without i18n being set on the client.
+     */
+    i18n: i18n;
 };
 
 declare module 'i18next' {
