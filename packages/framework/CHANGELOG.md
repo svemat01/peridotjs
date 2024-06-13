@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.1.3
+
+### Patch Changes
+
+-   9929dd7: Fix i18n getter
+
 ## 0.1.2
 
 ### Patch Changes

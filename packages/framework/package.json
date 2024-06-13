@@ -2,7 +2,7 @@
   "name": "@peridotjs/framework",
   "description": "",
   "author": "Jakob Helgesson",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": false,
   "publishConfig": {
     "access": "public"
