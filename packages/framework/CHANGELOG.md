@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.1.4
+
+### Patch Changes
+
+-   f93cfba: Add forgetten handler listeners for Select Menus and Modal Submits
+
 ## 0.1.3
 
 ### Patch Changes
