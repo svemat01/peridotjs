@@ -14,6 +14,10 @@ export async function onInteractionCreate(interaction: Interaction): Promise<voi
         client.emit(Events.PossibleAutocompleteInteraction, interaction);
     } else if (interaction.isButton()) {
         client.emit(Events.PossibleButtonInteraction, interaction);
+    } else if (interaction.isAnySelectMenu()) {
+        client.emit(Events.PossibleSelectMenuInteraction, interaction);
+    } else if (interaction.isModalSubmit()) {
+        client.emit(Events.PossibleModalSubmitInteraction, interaction);
     } else {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         logger.warn(`[PeridotJS] Unhandled interaction type: ${(interaction as any).constructor.name}`);
