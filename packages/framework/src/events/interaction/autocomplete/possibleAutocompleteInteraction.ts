@@ -1,6 +1,6 @@
 import { Result } from '@sapphire/result';
 import { Stopwatch } from '@sapphire/stopwatch';
-import { type AutocompleteInteraction, userMention } from 'discord.js';
+import { type AutocompleteInteraction } from 'discord.js';
 
 import { container } from '../../../structures/index.js';
 import { Events } from '../../index.js';
@@ -8,10 +8,10 @@ import { Events } from '../../index.js';
 export async function onPossibleAutocompleteInteraction(interaction: AutocompleteInteraction) {
     const {
         client,
-        handlers: { slashCommands },
+        handlers,
     } = container;
 
-    const command = slashCommands.get(interaction.commandName);
+    const command = handlers.getRegistry('slashCommands').unwrap().getHandler(interaction.commandName).unwrapOr(undefined);
     if (!command || !command.autocomplete) {
         return;
     }
@@ -24,21 +24,9 @@ export async function onPossibleAutocompleteInteraction(interaction: Autocomplet
 
     const result = await Result.fromAsync(async () => {
         const stopwatch = new Stopwatch();
+
         const result = await command.autocomplete!(interaction, {
             logger,
-            get i18n() {
-                // @ts-expect-error Hack to make it a lazy value
-                delete this.i18n;
-                this.i18n = container.i18n.cloneInstance({
-                    interpolation: {
-                        defaultVariables: {
-                            authorUsername: interaction.user.username,
-                            authorMention: userMention(interaction.user.id),
-                        },
-                    },
-                });
-                return this.i18n;
-            },
         });
         const { duration } = stopwatch.stop();
 

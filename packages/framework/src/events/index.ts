@@ -23,6 +23,7 @@ import type {
     TextCommand,
 } from '../index.js';
 import { container } from '../structures/container.js';
+import type { PluginHook } from '../structures/plugins.js';
 import {
     onButtonInteractionAccepted,
     onContextMenuCommandAccepted,
@@ -503,6 +504,8 @@ export const Events = {
     ModalSubmitInteractionFinish: 'ModalSubmitInteractionFinish' as const,
     // #endregion Modal Component chain
 
+    PluginLoaded: 'pluginLoaded' as const,
+
     // #endregion Custom events
 } as const;
 
@@ -860,6 +863,8 @@ declare module 'discord.js' {
             component: ModalComponent,
             payload: ModalSubmitInteractionFinishPayload,
         ];
+
+        [PeridotEvents.PluginLoaded]: [hook: PluginHook, name: string | undefined];
     }
 }
 

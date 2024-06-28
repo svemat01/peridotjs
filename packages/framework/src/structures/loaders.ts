@@ -1,7 +1,9 @@
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import type { ClientEvents } from 'discord.js';
+import { err, ok, type Result } from '@sapphire/result';
+import type { Awaitable } from '@sapphire/utilities/types';
+import type { ClientEvents, SelectMenuType } from 'discord.js';
 
 import {
     type ButtonComponent,
@@ -76,20 +78,7 @@ export async function loadStructures<T>(dir: string, predicate: StructurePredica
     return structures;
 }
 
-/**
- * Represents the export structure for a handler.
- */
-export type HandlerExport = {
-    text?: TextCommand[];
-    slash?: SlashCommand[];
-    contextMenu?: ContextMenuCommand[];
-    buttons?: ButtonComponent[];
-    modals?: ModalComponent[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    selectMenus?: SelectMenuComponent<any>[];
-    clientEvents?: ClientEvent<keyof ClientEvents>[];
-    __brand: 'HandlerExport';
-};
+export const HandlerExportSymbol = Symbol('HandlerExport');
 
 /**
  * Helper function to create a handler export object.
@@ -97,10 +86,10 @@ export type HandlerExport = {
  * @param handlerExport - The handler export object to create.
  * @returns The created handler export object.
  */
-export const createHandlerExport = (handlerExport: Omit<HandlerExport, '__brand'>) => {
+export const createHandlerExport = (handlerExport: Omit<HandlerExport, typeof HandlerExportSymbol>) => {
     return {
         ...handlerExport,
-        __brand: 'HandlerExport' as const,
+        [HandlerExportSymbol]: true,
     };
 };
 
@@ -111,69 +100,432 @@ export const createHandlerExport = (handlerExport: Omit<HandlerExport, '__brand'
  * @returns True if the value is a valid handler export, false otherwise.
  */
 export const isHandlerExport = (handlerExport: unknown): handlerExport is HandlerExport =>
-    typeof handlerExport === 'object' && handlerExport !== null && (handlerExport as HandlerExport)?.__brand === 'HandlerExport';
+    typeof handlerExport === 'object' && handlerExport !== null && (handlerExport as HandlerExport)[HandlerExportSymbol] === true;
 
-/**
- * Loads and exports handlers from the specified directory.
- *
- * @param dir - The directory to load handlers from.
- * @param recursive - Optional. Specifies whether to load handlers recursively. Default is true.
- * @param overwrite - Optional. Specifies whether to overwrite existing handlers. Default is true.
- * @returns A promise that resolves when the handlers are loaded and exported.
- */
-export async function loadHandlerExports(dir: string, recursive = true, overwrite = true) {
-    const { handlers, logger } = container;
+export interface HandlerRegistry<T> {
+    name: keyof HandlerRegistries;
+    _register(handler: T): Awaitable<this>;
+    _unregister(handler: T): Awaitable<this>;
+    _unregisterAll(): Awaitable<this>;
+}
+export type HandlerExport = {
+    [key in keyof HandlerRegistries]: HandlerRegistries[key] extends HandlerRegistry<infer T> ? T[] : never;
+} & {
+    [HandlerExportSymbol]: true;
+};
 
-    logger.debug({ dir }, 'Loading handlers from');
+// #region Registries
+export class TextCommandRegistry implements HandlerRegistry<TextCommand> {
+    public readonly name = 'textCommands';
 
-    const _exports = await loadStructures(dir, isHandlerExport, recursive);
+    private handlers = new Map<string, TextCommand>();
+    private aliases = new Map<string, string>();
 
-    if (overwrite) {
-        handlers.textCommands.clear();
-        handlers.slashCommands.clear();
-        handlers.contextMenuCommands.clear();
-        handlers.buttons = [];
-        handlers.modals = [];
-        handlers.selectMenus = [];
+    public _register(handler: TextCommand): this {
+        this.handlers.set(handler.data.name, handler);
+        for (const alias of handler.data.aliases ?? []) {
+            this.aliases.set(alias, handler.data.name);
+        }
+        return this;
+    }
 
-        for (const [name, events] of handlers.clientEvents) {
+    public _unregister(handler: TextCommand): this {
+        this.handlers.delete(handler.data.name);
+        for (const alias of handler.data.aliases ?? []) {
+            this.aliases.delete(alias);
+        }
+        return this;
+    }
+
+    public _unregisterAll(): this {
+        this.handlers.clear();
+        this.aliases.clear();
+        return this;
+    }
+
+    public getHandlers(): TextCommand[] {
+        return [...this.handlers.values()];
+    }
+
+    public getHandler(name: string): Result<TextCommand, Error> {
+        let handler = this.handlers.get(name);
+
+        if (handler === undefined) {
+            const alias = this.aliases.get(name);
+            if (alias !== undefined) {
+                handler = this.handlers.get(alias);
+            }
+        }
+
+        if (handler === undefined) {
+            return err(new Error(`The handler '${name}' does not exist.`));
+        }
+
+        return ok(handler);
+    }
+}
+
+export class SlashCommandRegistry implements HandlerRegistry<SlashCommand> {
+    public readonly name = 'slashCommands';
+
+    private handlers = new Map<string, SlashCommand>();
+
+    public _register(handler: SlashCommand): Awaitable<this> {
+        this.handlers.set(handler.data.name, handler);
+        return this;
+    }
+
+    public _unregister(handler: SlashCommand): Awaitable<this> {
+        this.handlers.delete(handler.data.name);
+        return this;
+    }
+
+    public _unregisterAll(): Awaitable<this> {
+        this.handlers.clear();
+        return this;
+    }
+
+    public getHandlers(): SlashCommand[] {
+        return [...this.handlers.values()];
+    }
+
+    public getHandler(name: string): Result<SlashCommand, Error> {
+        const handler = this.handlers.get(name);
+        if (handler === undefined) {
+            return err(new Error(`The handler '${name}' does not exist.`));
+        }
+
+        return ok(handler);
+    }
+}
+
+export class ContextMenuCommandRegistry implements HandlerRegistry<ContextMenuCommand> {
+    public readonly name = 'contextMenuCommands';
+
+    private handlers = new Map<string, ContextMenuCommand>();
+
+    public _register(handler: ContextMenuCommand): Awaitable<this> {
+        this.handlers.set(handler.data.name, handler);
+        return this;
+    }
+
+    public _unregister(handler: ContextMenuCommand): Awaitable<this> {
+        this.handlers.delete(handler.data.name);
+        return this;
+    }
+
+    public _unregisterAll(): Awaitable<this> {
+        this.handlers.clear();
+        return this;
+    }
+
+    public getHandlers(): ContextMenuCommand[] {
+        return [...this.handlers.values()];
+    }
+
+    public getHandler(name: string): Result<ContextMenuCommand, Error> {
+        const handler = this.handlers.get(name);
+        if (handler === undefined) {
+            return err(new Error(`The handler '${name}' does not exist.`));
+        }
+
+        return ok(handler);
+    }
+}
+
+export class ButtonComponentRegistry implements HandlerRegistry<ButtonComponent> {
+    public readonly name = 'buttonComponents';
+    private staticHandlers = new Map<string, ButtonComponent>();
+    private regexHandlers = new Map<RegExp, ButtonComponent>();
+
+    public _register(handler: ButtonComponent): Awaitable<this> {
+        if (handler.customId instanceof RegExp) {
+            this.regexHandlers.set(handler.customId, handler);
+        } else {
+            this.staticHandlers.set(handler.customId, handler);
+        }
+        return this;
+    }
+
+    public _unregister(handler: ButtonComponent): Awaitable<this> {
+        if (handler.customId instanceof RegExp) {
+            this.regexHandlers.delete(handler.customId);
+        } else {
+            this.staticHandlers.delete(handler.customId);
+        }
+        return this;
+    }
+
+    public _unregisterAll(): Awaitable<this> {
+        this.staticHandlers.clear();
+        this.regexHandlers.clear();
+        return this;
+    }
+
+    public getHandlers(): ButtonComponent[] {
+        return [...this.staticHandlers.values(), ...this.regexHandlers.values()];
+    }
+
+    public getHandler(id: string): Result<ButtonComponent, Error> {
+        const staticHandler = this.staticHandlers.get(id);
+        if (staticHandler !== undefined) {
+            return ok(staticHandler);
+        }
+
+        for (const [regex, handler] of this.regexHandlers) {
+            if (regex.test(id)) {
+                return ok(handler);
+            }
+        }
+
+        return err(new Error(`The handler '${id}' does not exist.`));
+    }
+}
+
+export class ModalComponentRegistry implements HandlerRegistry<ModalComponent> {
+    public readonly name = 'modalComponents';
+
+    private staticHandlers = new Map<string, ModalComponent>();
+    private regexHandlers = new Map<RegExp, ModalComponent>();
+
+    public _register(handler: ModalComponent): Awaitable<this> {
+        if (handler.customId instanceof RegExp) {
+            this.regexHandlers.set(handler.customId, handler);
+        } else {
+            this.staticHandlers.set(handler.customId, handler);
+        }
+        return this;
+    }
+    public _unregister(handler: ModalComponent): Awaitable<this> {
+        if (handler.customId instanceof RegExp) {
+            this.regexHandlers.delete(handler.customId);
+        } else {
+            this.staticHandlers.delete(handler.customId);
+        }
+        return this;
+    }
+    public _unregisterAll(): Awaitable<this> {
+        this.staticHandlers.clear();
+        this.regexHandlers.clear();
+        return this;
+    }
+    public getHandlers(): ModalComponent[] {
+        return [...this.staticHandlers.values(), ...this.regexHandlers.values()];
+    }
+    public getHandler(id: string): Result<ModalComponent, Error> {
+        const staticHandler = this.staticHandlers.get(id);
+        if (staticHandler !== undefined) {
+            return ok(staticHandler);
+        }
+        for (const [regex, handler] of this.regexHandlers) {
+            if (regex.test(id)) {
+                return ok(handler);
+            }
+        }
+        return err(new Error(`The handler '${id}' does not exist.`));
+    }
+}
+
+export class SelectMenuComponentRegistry implements HandlerRegistry<SelectMenuComponent<SelectMenuType>> {
+    public readonly name = 'selectMenuComponents';
+
+    private staticHandlers = new Map<string, SelectMenuComponent<SelectMenuType>>();
+    private regexHandlers = new Map<RegExp, SelectMenuComponent<SelectMenuType>>();
+
+    public _register(handler: SelectMenuComponent<SelectMenuType>): Awaitable<this> {
+        if (handler.customId instanceof RegExp) {
+            this.regexHandlers.set(handler.customId, handler);
+        } else {
+            this.staticHandlers.set(handler.customId, handler);
+        }
+        return this;
+    }
+    public _unregister(handler: SelectMenuComponent<SelectMenuType>): Awaitable<this> {
+        if (handler.customId instanceof RegExp) {
+            this.regexHandlers.delete(handler.customId);
+        } else {
+            this.staticHandlers.delete(handler.customId);
+        }
+        return this;
+    }
+    public _unregisterAll(): Awaitable<this> {
+        this.staticHandlers.clear();
+        this.regexHandlers.clear();
+        return this;
+    }
+    public getHandlers(): SelectMenuComponent<SelectMenuType>[] {
+        return [...this.staticHandlers.values(), ...this.regexHandlers.values()];
+    }
+    public getHandler(id: string): Result<SelectMenuComponent<SelectMenuType>, Error> {
+        const staticHandler = this.staticHandlers.get(id);
+        if (staticHandler !== undefined) {
+            return ok(staticHandler);
+        }
+        for (const [regex, handler] of this.regexHandlers) {
+            if (regex.test(id)) {
+                return ok(handler);
+            }
+        }
+        return err(new Error(`The handler '${id}' does not exist.`));
+    }
+}
+
+export class ClientEventRegistry implements HandlerRegistry<ClientEvent<keyof ClientEvents>> {
+    public readonly name = 'clientEvents';
+
+    private handlers = new Map<keyof ClientEvents, Set<ClientEvent<keyof ClientEvents>>>();
+
+    public _register(handler: ClientEvent<keyof ClientEvents>): Awaitable<this> {
+        const events = this.handlers.get(handler.name) ?? new Set();
+        events.add(handler);
+        this.handlers.set(handler.name, events);
+
+        if (handler.type === 'on') {
+            container.client.on(handler.name, handler.run);
+        } else {
+            container.client.once(handler.name, handler.run);
+        }
+
+        return this;
+    }
+
+    public _unregister(handler: ClientEvent<keyof ClientEvents>): Awaitable<this> {
+        const events = this.handlers.get(handler.name);
+        if (events !== undefined) {
+            events.delete(handler);
+            if (events.size === 0) {
+                this.handlers.delete(handler.name);
+            }
+        }
+
+        container.client.off(handler.name, handler.run);
+
+        return this;
+    }
+
+    public _unregisterAll(): Awaitable<this> {
+        for (const [name, events] of this.handlers) {
             for (const event of events) {
                 container.client.off(name, event.run);
             }
         }
 
-        handlers.clientEvents.clear();
+        this.handlers.clear();
+        return this;
     }
 
-    for (const _export of _exports) {
-        for (const text of _export.text ?? []) {
-            handlers.textCommands.set(text.data.name, text);
+    public getAllHandlers() {
+        return this.handlers;
+    }
+
+    public getHandlers(name: keyof ClientEvents): Result<Set<ClientEvent<keyof ClientEvents>>, Error> {
+        const handlers = this.handlers.get(name);
+        if (handlers === undefined) {
+            return err(new Error(`The handlers for '${name}' do not exist.`));
         }
 
-        for (const slash of _export.slash ?? []) {
-            handlers.slashCommands.set(slash.data.name, slash);
+        return ok(handlers);
+    }
+}
+
+export interface HandlerRegistries {
+    textCommands: TextCommandRegistry;
+    slashCommands: SlashCommandRegistry;
+    contextMenuCommands: ContextMenuCommandRegistry;
+    buttonComponents: ButtonComponentRegistry;
+    modalComponents: ModalComponentRegistry;
+    selectMenuComponents: SelectMenuComponentRegistry;
+    clientEvents: ClientEventRegistry;
+}
+// #endregion Registries
+
+/**
+ * Represents a registry manager for handlers.
+ * This framework provides handler registries for text commands, slash commands, context menu commands, buttons, modals, select menus, and client events.
+ * Plugins can also create their own registries for custom handlers implementing the {@link HandlerRegistry} interface.
+ */
+export class HandlerRegistryManager {
+    // We can't hardcode the different registries because additional ones can be added by plugins
+    // So we use a map to store the registries
+    public readonly registries = new Map<keyof HandlerRegistries, HandlerRegistries[keyof HandlerRegistries]>();
+
+    /**
+     * Registers a handler registry.
+     * @param registry The registry to register.
+     */
+    public registerRegistry<T extends HandlerRegistries[keyof HandlerRegistries]>(registry: T): this {
+        this.registries.set(registry.name, registry);
+        return this;
+    }
+
+    /**
+     * Unregister a handler registry.
+     * @param registry The registry to unregister.
+     */
+    public unregisterRegistry<T extends HandlerRegistry<unknown>>(registry: T): this {
+        this.registries.delete(registry.name);
+        return this;
+    }
+
+    /**
+     * Unregister all handler registries.
+     */
+    public unregisterAllRegistries(): this {
+        this.registries.clear();
+        return this;
+    }
+
+    /**
+     * Get a handler registry by name.
+     * @param name The name of the registry to get.
+     */
+    public getRegistry<T extends keyof HandlerRegistries>(name: T): Result<HandlerRegistries[T], Error> {
+        const registry = this.registries.get(name);
+        if (registry === undefined) {
+            return err(new Error(`The registry '${name}' does not exist.`));
         }
 
-        for (const contextMenu of _export.contextMenu ?? []) {
-            handlers.contextMenuCommands.set(contextMenu.data.name, contextMenu);
+        return ok(registry as unknown as HandlerRegistries[T]);
+    }
+
+    /**
+     * Get all handler registries.
+     */
+    public getRegistries(): HandlerRegistries {
+        return this.registries as unknown as HandlerRegistries;
+    }
+
+    public async loadHandlerExports(dir: string, recursive = true, overwrite = true) {
+        const { logger } = container;
+
+        logger.debug({ dir }, 'Loading handlers from');
+
+        const _exports = await loadStructures(dir, isHandlerExport, recursive);
+
+        if (overwrite) {
+            await Promise.all([...this.registries.values()].map((registry) => registry._unregisterAll()));
         }
 
-        for (const event of _export.clientEvents ?? []) {
-            const events = handlers.clientEvents.get(event.name) ?? new Set();
-            events.add(event);
-            handlers.clientEvents.set(event.name, events);
-
-            if (event.type === 'on') {
-                container.client.on(event.name, event.run);
-            } else {
-                container.client.once(event.name, event.run);
+        for (const _export of _exports) {
+            for (const [name, registry] of this.registries.entries()) {
+                for (const handler of _export[name]) {
+                    await registry._register(handler as never);
+                }
             }
         }
-
-        handlers.buttons.push(...(_export.buttons ?? []));
-        handlers.modals.push(...(_export.modals ?? []));
-        handlers.selectMenus.push(...(_export.selectMenus ?? []));
     }
+}
 
-    logger.debug({dir}, 'Loaded handlers from');
+/**
+ * Used to register the built-in handler registries.
+ * @private This is an internal function and should not be used.
+ */
+export const registerBuiltInHandlerRegistries = (manager: HandlerRegistryManager) => {
+    manager.registerRegistry(new TextCommandRegistry());
+    manager.registerRegistry(new SlashCommandRegistry());
+    manager.registerRegistry(new ContextMenuCommandRegistry());
+    manager.registerRegistry(new ButtonComponentRegistry());
+    manager.registerRegistry(new ModalComponentRegistry());
+    manager.registerRegistry(new SelectMenuComponentRegistry());
+    manager.registerRegistry(new ClientEventRegistry());
 }

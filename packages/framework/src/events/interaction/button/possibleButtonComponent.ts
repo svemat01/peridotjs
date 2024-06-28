@@ -7,13 +7,10 @@ export const onPossibleButtonInteraction = ((interaction) => {
     const {
         client,
         logger,
-        handlers: { buttons },
+        handlers,
     } = container;
 
-    const component = buttons.find((b) => {
-        if (typeof b.customId === 'string') return b.customId === interaction.customId;
-        return b.customId.test(interaction.customId);
-    });
+    const component = handlers.getRegistry('buttonComponents').unwrap().getHandler(interaction.customId).unwrapOr(undefined);
 
     if (!component) {
         client.emit(Events.UnknownButtonInteraction, { interaction });

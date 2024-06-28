@@ -8,6 +8,7 @@ import type { CommonContext } from './index.js';
 export type TextCommandData = {
     name: string;
     description: string;
+    aliases?: string[];
     /**
      * Works in DMs?
      */

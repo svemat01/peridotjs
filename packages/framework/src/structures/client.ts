@@ -1,10 +1,13 @@
 import type { Awaitable, ClientOptions, Message, Snowflake } from 'discord.js';
-import { Client, Events } from 'discord.js';
+import { Client } from 'discord.js';
 import type { i18n } from 'i18next';
 import type { Logger } from 'pino';
 
+import { Events } from '../events/index.js';
 import { container } from './container.js';
+import { HandlerRegistryManager, registerBuiltInHandlerRegistries } from './loaders.js';
 import type { PermissionLevelConfig } from './permissions.js';
+import { Plugin, PluginHook, PluginManager } from './plugins.js';
 
 /**
  * A valid prefix in Peridot.
@@ -18,7 +21,7 @@ export type PeridotPrefixHook = {
     (message: Message): Awaitable<PeridotPrefix>;
 };
 
-export type PeridotClientOptions = {
+export interface PeridotClientOptions {
     /**
      * The default prefix, in case of `null`, only mention prefix will trigger the bot's commands.
      * @since 1.0.0
@@ -167,20 +170,61 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
     public constructor(options: ClientOptions) {
         super(options);
 
-        container.init(this, options.logger, options.i18n);
-        container.permissionConfig = options.permissionConfig;
+        container.client = this;
+
+        for (const plugin of PeridotClient.plugins.values(PluginHook.PreGenericsInitialization)) {
+            plugin.hook.call(this, options);
+            this.emit(Events.PluginLoaded, plugin.type, plugin.name);
+        }
 
         this.logger = options.logger;
+        container.logger = options.logger;
+        container.permissionConfig = options.permissionConfig;
+        container.handlers = new HandlerRegistryManager();
+        registerBuiltInHandlerRegistries(container.handlers);
 
         this.fetchPrefix = options.fetchPrefix ?? (() => this.options.defaultPrefix ?? null);
         this.disableMentionPrefix = options.disableMentionPrefix;
+
+        for (const plugin of PeridotClient.plugins.values(PluginHook.PreInitialization)) {
+            plugin.hook.call(this, options);
+            this.emit(Events.PluginLoaded, plugin.type, plugin.name);
+        }
 
         this.id = options.id ?? null;
 
         this.once(Events.ClientReady, () => {
             this.id = this.user?.id ?? null;
         });
+
+        for (const plugin of PeridotClient.plugins.values(PluginHook.PostInitialization)) {
+            plugin.hook.call(this, options);
+            this.emit(Events.PluginLoaded, plugin.type, plugin.name);
+        }
     }
+
+    public override async login(token?: string) {
+        for (const plugin of PeridotClient.plugins.values(PluginHook.PreLogin)) {
+            await plugin.hook.call(this, this.options);
+            this.emit(Events.PluginLoaded, plugin.type, plugin.name);
+        }
+
+        const login = await super.login(token);
+
+        for (const plugin of PeridotClient.plugins.values(PluginHook.PostLogin)) {
+            await plugin.hook.call(this, this.options);
+            this.emit(Events.PluginLoaded, plugin.type, plugin.name);
+        }
+
+        return login;
+    }
+
+    public static plugins = new PluginManager();
+
+	public static use(plugin: typeof Plugin) {
+		this.plugins.use(plugin);
+		return this;
+	}
 }
 
 declare module 'discord.js' {

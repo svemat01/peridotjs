@@ -7,13 +7,10 @@ export const onPossibleModalSubmitInteraction = ((interaction) => {
     const {
         client,
         logger,
-        handlers: { modals },
+        handlers,
     } = container;
 
-    const component = modals.find((b) => {
-        if (typeof b.customId === 'string') return b.customId === interaction.customId;
-        return b.customId.test(interaction.customId);
-    });
+    const component = handlers.getRegistry('modalComponents').unwrap().getHandler(interaction.customId).unwrapOr(undefined);
 
     if (!component) {
         client.emit(Events.UnknownModalSubmitInteraction, { interaction });

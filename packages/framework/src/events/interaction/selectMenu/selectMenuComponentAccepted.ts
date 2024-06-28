@@ -1,8 +1,6 @@
 import { Result } from '@sapphire/result';
 import { Stopwatch } from '@sapphire/stopwatch';
-import { userMention } from 'discord.js';
 
-import { container } from '../../../structures/container.js';
 import { Events, type SelectMenuInteractionAcceptedPayload } from '../../index.js';
 
 export async function onSelectMenuInteractionAccepted(payload: SelectMenuInteractionAcceptedPayload) {
@@ -16,19 +14,6 @@ export async function onSelectMenuInteractionAccepted(payload: SelectMenuInterac
         const stopwatch = new Stopwatch();
         const result = await component.run(interaction, {
             logger,
-            get i18n() {
-                // @ts-expect-error Hack to make it a lazy value
-                delete this.i18n;
-                this.i18n = container.i18n.cloneInstance({
-                    interpolation: {
-                        defaultVariables: {
-                            authorUsername: interaction.user.username,
-                            authorMention: userMention(interaction.user.id),
-                        },
-                    },
-                });
-                return this.i18n;
-            }
         });
         const { duration } = stopwatch.stop();
 

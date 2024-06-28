@@ -7,10 +7,10 @@ export const onPossibleContextMenuCommand = ((interaction) => {
     const {
         client,
         logger,
-        handlers: { contextMenuCommands },
+        handlers,
     } = container;
 
-    const command = contextMenuCommands.get(interaction.commandName);
+    const command = handlers.getRegistry('contextMenuCommands').unwrap().getHandler(interaction.commandName).unwrapOr(undefined);
     if (!command) {
         client.emit(Events.UnknownContextMenuCommand, { interaction });
 

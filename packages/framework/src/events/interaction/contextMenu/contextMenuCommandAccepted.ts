@@ -1,8 +1,6 @@
 import { Result } from '@sapphire/result';
 import { Stopwatch } from '@sapphire/stopwatch';
-import { userMention } from 'discord.js';
 
-import { container } from '../../../structures/container.js';
 import { type ContextMenuCommandAcceptedPayload,Events } from '../../index.js';
 
 
@@ -22,14 +20,6 @@ export async function onContextMenuCommandAccepted(payload: ContextMenuCommandAc
         // @ts-expect-error Typescript breaks since user and message context menus have different types
         const result = await command.run(interaction, {
             logger,
-            i18n: container.i18n.cloneInstance({
-                interpolation: {
-                    defaultVariables: {
-                        authorUsername: interaction.user.username,
-                        authorMention: userMention(interaction.user.id),
-                    },
-                },
-            }),
         });
         const { duration } = stopwatch.stop();
 

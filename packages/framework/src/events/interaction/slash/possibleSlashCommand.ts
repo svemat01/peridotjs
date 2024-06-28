@@ -4,13 +4,9 @@ import { container } from '../../../structures/index.js';
 import { Events } from '../../index.js';
 
 export const onPossibleSlashCommand = ((interaction) => {
-    const {
-        client,
-        logger,
-        handlers: { slashCommands },
-    } = container;
+    const { client, logger, handlers } = container;
 
-    const command = slashCommands.get(interaction.commandName);
+    const command = handlers.getRegistry('slashCommands').unwrap().getHandler(interaction.commandName).unwrapOr(undefined);
     if (!command) {
         client.emit(Events.UnknownSlashCommand, { interaction });
 

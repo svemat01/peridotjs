@@ -3,11 +3,9 @@ import { ArgumentStream, Lexer, Parser } from '@sapphire/lexure';
 import { Result } from '@sapphire/result';
 import { Stopwatch } from '@sapphire/stopwatch';
 import type { Message } from 'discord.js';
-import { userMention } from 'discord.js';
 
 import { FlagUnorderedStrategy } from '../../arguments/FlagStrategy.js';
 import { Args } from '../../arguments/Parser.js';
-import { container } from '../../structures/container.js';
 import type { TextCommandAcceptedPayload } from '../index.js';
 import { Events } from '../index.js';
 
@@ -24,22 +22,10 @@ export async function onTextCommandAccepted(payload: TextCommandAcceptedPayload)
         });
 
         const stopwatch = new Stopwatch();
+
         const result = await command.run(message, {
             args,
             logger,
-            get i18n() {
-                // @ts-expect-error Hack to make it a lazy value
-                delete this.i18n;
-                this.i18n = container.i18n.cloneInstance({
-                    interpolation: {
-                        defaultVariables: {
-                            authorUsername: message.author.username,
-                            authorMention: userMention(message.author.id),
-                        },
-                    },
-                });
-                return this.i18n;
-            },
         });
         const { duration } = stopwatch.stop();
 

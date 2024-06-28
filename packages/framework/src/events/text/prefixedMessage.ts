@@ -6,7 +6,7 @@ import { Events } from '../index.js';
 export function onPrefixedMessage(message: Message, prefix: string | RegExp) {
     const {
         client,
-        handlers: { textCommands },
+        handlers,
         logger,
     } = container;
     container.logger.trace({ src: message.id, prefix }, 'Prefixed received');
@@ -24,7 +24,7 @@ export function onPrefixedMessage(message: Message, prefix: string | RegExp) {
     }
 
     // Retrieve the command and validate:
-    const command = textCommands.get(commandName);
+    const command = handlers.getRegistry('textCommands').unwrap().getHandler(commandName).unwrapOr(undefined);
     if (!command) {
         client.emit(Events.UnknownTextCommand, { message, prefix, commandName, commandPrefix });
         return;

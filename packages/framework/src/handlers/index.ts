@@ -1,4 +1,3 @@
-import type { i18n } from 'i18next';
 import type { Logger } from 'pino';
 
 export type CommandResult =
@@ -10,13 +9,13 @@ export type CommandResult =
           message: string;
       };
 
-export type CommonContext = {
+export interface CommonContext {
     logger: Logger;
-    /**
-     * The i18n instance for this interaction.
-     * @throws If accessed without i18n being set on the client.
-     */
-    i18n: i18n;
+    // /**
+    //  * The i18n instance for this interaction.
+    //  * @throws If accessed without i18n being set on the client.
+    //  */
+    // i18n: i18n;
 };
 
 declare module 'i18next' {

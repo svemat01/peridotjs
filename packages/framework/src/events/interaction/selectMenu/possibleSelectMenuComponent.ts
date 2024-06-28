@@ -7,13 +7,10 @@ export const onPossibleSelectMenuInteraction = ((interaction) => {
     const {
         client,
         logger,
-        handlers: { selectMenus },
+        handlers,
     } = container;
 
-    const component = selectMenus.find((b) => {
-        if (typeof b.customId === 'string') return b.customId === interaction.customId;
-        return b.customId.test(interaction.customId);
-    });
+    const component = handlers.getRegistry('selectMenuComponents').unwrap().getHandler(interaction.customId).unwrapOr(undefined);
 
     if (!component) {
         client.emit(Events.UnknownSelectMenuInteraction, { interaction });
