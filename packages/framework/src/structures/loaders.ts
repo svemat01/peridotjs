@@ -86,7 +86,7 @@ export const HandlerExportSymbol = Symbol('HandlerExport');
  * @param handlerExport - The handler export object to create.
  * @returns The created handler export object.
  */
-export const createHandlerExport = (handlerExport: Omit<HandlerExport, typeof HandlerExportSymbol>) => {
+export const createHandlerExport = (handlerExport: Omit<HandlerExport, typeof HandlerExportSymbol>): HandlerExport => {
     return {
         ...handlerExport,
         [HandlerExportSymbol]: true,
@@ -109,7 +109,7 @@ export interface HandlerRegistry<T> {
     _unregisterAll(): Awaitable<this>;
 }
 export type HandlerExport = {
-    [key in keyof HandlerRegistries]: HandlerRegistries[key] extends HandlerRegistry<infer T> ? T[] : never;
+    [key in keyof HandlerRegistries]?: HandlerRegistries[key] extends HandlerRegistry<infer T> ? T[] : never;
 } & {
     [HandlerExportSymbol]: true;
 };
@@ -326,13 +326,17 @@ export class ModalComponentRegistry implements HandlerRegistry<ModalComponent> {
     }
 }
 
-export class SelectMenuComponentRegistry implements HandlerRegistry<SelectMenuComponent<SelectMenuType>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class SelectMenuComponentRegistry implements HandlerRegistry<SelectMenuComponent<any>> {
     public readonly name = 'selectMenuComponents';
 
-    private staticHandlers = new Map<string, SelectMenuComponent<SelectMenuType>>();
-    private regexHandlers = new Map<RegExp, SelectMenuComponent<SelectMenuType>>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private staticHandlers = new Map<string, SelectMenuComponent<any>>();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private regexHandlers = new Map<RegExp, SelectMenuComponent<any>>();
 
-    public _register(handler: SelectMenuComponent<SelectMenuType>): Awaitable<this> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public _register(handler: SelectMenuComponent<any>): Awaitable<this> {
         if (handler.customId instanceof RegExp) {
             this.regexHandlers.set(handler.customId, handler);
         } else {
@@ -340,7 +344,8 @@ export class SelectMenuComponentRegistry implements HandlerRegistry<SelectMenuCo
         }
         return this;
     }
-    public _unregister(handler: SelectMenuComponent<SelectMenuType>): Awaitable<this> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public _unregister(handler: SelectMenuComponent<any>): Awaitable<this> {
         if (handler.customId instanceof RegExp) {
             this.regexHandlers.delete(handler.customId);
         } else {
@@ -353,7 +358,8 @@ export class SelectMenuComponentRegistry implements HandlerRegistry<SelectMenuCo
         this.regexHandlers.clear();
         return this;
     }
-    public getHandlers(): SelectMenuComponent<SelectMenuType>[] {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public getHandlers(): SelectMenuComponent<any>[] {
         return [...this.staticHandlers.values(), ...this.regexHandlers.values()];
     }
     public getHandler(id: string): Result<SelectMenuComponent<SelectMenuType>, Error> {
@@ -508,7 +514,7 @@ export class HandlerRegistryManager {
 
         for (const _export of _exports) {
             for (const [name, registry] of this.registries.entries()) {
-                for (const handler of _export[name]) {
+                for (const handler of _export[name] ?? []) {
                     await registry._register(handler as never);
                 }
             }
