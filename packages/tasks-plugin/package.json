@@ -1,0 +1,58 @@
+{
+  "name": "@peridotjs/plugin-tasks",
+  "description": "",
+  "author": "Jakob Helgesson",
+  "version": "0.0.1",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@peridotjs/framework": "workspace:*",
+    "@sapphire/utilities": "^3.16.2",
+    "bullmq": "^5.8.3",
+    "ioredis": "^5.4.1"
+  },
+  "devDependencies": {
+    "@discordjs/docgen": "^0.12.1",
+    "@eslint/js": "^9.3.0",
+    "@peridotjs/base": "workspace:*",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^20.12.12",
+    "eslint": "^9.2.0",
+    "eslint-plugin-simple-import-sort": "^12.1.0",
+    "eslint-plugin-unused-imports": "^3.2.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.10.0"
+  },
+  "peerDependencies": {
+    "discord.js": "^14.15.2"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
+    }
+  },
+  "keywords": [],
+  "license": "MIT",
+  "main": "dist/src/index.js",
+  "files": [
+    "dist/src",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "scripts": {
+    "lint": "eslint",
+    "build": "tsc -p tsconfig.json"
+  },
+  "type": "module",
+  "madge": {
+    "detectiveOptions": {
+      "ts": {
+        "skipTypeImports": true
+      }
+    }
+  }
+}
