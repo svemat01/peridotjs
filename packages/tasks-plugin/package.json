@@ -2,7 +2,7 @@
   "name": "@peridotjs/plugin-tasks",
   "description": "",
   "author": "Jakob Helgesson",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": false,
   "publishConfig": {
     "access": "public"

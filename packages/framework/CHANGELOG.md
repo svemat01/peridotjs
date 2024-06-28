@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.2.0
+
+### Minor Changes
+
+-   e5aeec4: Reworked internal handler layout and introduce plugin system
+
 ## 0.1.4
 
 ### Patch Changes
