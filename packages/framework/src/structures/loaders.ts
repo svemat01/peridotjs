@@ -392,12 +392,14 @@ export class SelectMenuComponentRegistry implements HandlerRegistry<SelectMenuCo
     }
 }
 
-export class ClientEventRegistry implements HandlerRegistry<ClientEvent<keyof ClientEvents>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class ClientEventRegistry implements HandlerRegistry<ClientEvent<any>> {
     public readonly name = 'clientEvents';
 
     private handlers = new Map<keyof ClientEvents, Set<ClientEvent<keyof ClientEvents>>>();
 
-    public _register(handler: ClientEvent<keyof ClientEvents>): Awaitable<this> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public _register(handler: ClientEvent<any>): Awaitable<this> {
         const events = this.handlers.get(handler.name) ?? new Set();
         events.add(handler);
         this.handlers.set(handler.name, events);
@@ -411,7 +413,8 @@ export class ClientEventRegistry implements HandlerRegistry<ClientEvent<keyof Cl
         return this;
     }
 
-    public _unregister(handler: ClientEvent<keyof ClientEvents>): Awaitable<this> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public _unregister(handler: ClientEvent<any>): Awaitable<this> {
         const events = this.handlers.get(handler.name);
         if (events !== undefined) {
             events.delete(handler);
