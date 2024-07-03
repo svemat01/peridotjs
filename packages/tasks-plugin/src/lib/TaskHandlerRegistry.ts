@@ -1,37 +1,71 @@
-import { type CommonContext, container, type HandlerRegistry } from '@peridotjs/framework';
+import { container, type HandlerRegistry } from '@peridotjs/framework';
 import type { Awaitable } from '@sapphire/utilities';
-import { FlowProducer, Job, type JobsOptions,Queue, type QueueOptions, Worker, type WorkerOptions } from 'bullmq';
+import {
+    FlowProducer,
+    Job,
+    type JobsOptions,
+    Queue,
+    type QueueOptions,
+    RedisConnection,
+    type RepeatOptions,
+    Worker,
+    type WorkerOptions,
+} from 'bullmq';
 
-type JobExecutor<Queue extends QueueName> = {
-    queue: Queue;
-    workerOptions?: WorkerOptions;
-    run: JobExecutorRun<Queue, CommonContext>;
-};
+import { TaskEvents } from './types/Events.js';
+import type { QueueName, Queues } from './types/Queue.js';
+import type { TaskWorker } from './types/TaskWorker.js';
 
-type JobExecutorRun<Queue extends QueueName, Context extends CommonContext> = (
-    job: Job<Queues[Queue]['payload'], Queues[Queue]['response']>,
-    ctx: Context,
-) => Promise<Queues[Queue]['response']>;
-
-export class TaskHandlerRegistry implements HandlerRegistry<JobExecutor<QueueName>> {
+export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<QueueName>> {
     public readonly name = 'tasks';
 
     private workers = new Map<string, Worker>();
     private queues = new Map<string, Queue>();
-    private executors = new Map<string, JobExecutor<QueueName>>();
+    private executors = new Map<string, TaskWorker<QueueName>>();
 
-    private flowProducer: FlowProducer | null = null;
+    private _flowProducer: FlowProducer | null = null;
 
-    public _register(executor: JobExecutor<QueueName>): this {
+    private createWorker(queue: QueueName, workerOptions?: WorkerOptions): Worker {
+        const worker = new Worker(queue, this.run, workerOptions, container.redis as unknown as typeof RedisConnection);
+
+        worker.on('active', (...args) => container.client.emit(TaskEvents.WorkerActive, queue, ...args));
+        worker.on('closed', (...args) => container.client.emit(TaskEvents.WorkerClosed, queue, ...args));
+        worker.on('closing', (...args) => container.client.emit(TaskEvents.WorkerClosing, queue, ...args));
+        worker.on('completed', (...args) => container.client.emit(TaskEvents.WorkerCompleted, queue, ...args));
+        worker.on('drained', (...args) => container.client.emit(TaskEvents.WorkerDrained, queue, ...args));
+        worker.on('error', (...args) => container.client.emit(TaskEvents.WorkerError, queue, ...args));
+        worker.on('failed', (...args) => container.client.emit(TaskEvents.WorkerFailed, queue, ...args));
+        worker.on('paused', (...args) => container.client.emit(TaskEvents.WorkerPaused, queue, ...args));
+        worker.on('progress', (...args) => container.client.emit(TaskEvents.WorkerProgress, queue, ...args));
+        worker.on('ready', (...args) => container.client.emit(TaskEvents.WorkerReady, queue, ...args));
+        worker.on('resumed', (...args) => container.client.emit(TaskEvents.WorkerResumed, queue, ...args));
+        worker.on('stalled', (...args) => container.client.emit(TaskEvents.WorkerStalled, queue, ...args));
+
+        return worker;
+    }
+
+    private createQueue(queueName: QueueName, queueOptions?: QueueOptions): Queue {
+        const queue = new Queue(queueName, queueOptions, container.redis as unknown as typeof RedisConnection);
+
+        queue.on('cleaned', (...args) => container.client.emit(TaskEvents.QueueCleaned, queueName, ...args));
+        queue.on('error', (...args) => container.client.emit(TaskEvents.QueueError, queueName, ...args));
+        queue.on('paused', (...args) => container.client.emit(TaskEvents.QueuePaused, queueName, ...args));
+        queue.on('progress', (...args) => container.client.emit(TaskEvents.QueueProgress, queueName, ...args));
+        queue.on('removed', (...args) => container.client.emit(TaskEvents.QueueRemoved, queueName, ...args));
+        queue.on('waiting', (...args) => container.client.emit(TaskEvents.QueueWaiting, queueName, ...args));
+
+        return queue;
+    }
+
+    public _register(executor: TaskWorker<QueueName>): this {
         this.executors.set(executor.queue, executor);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const worker = new Worker(executor.queue, this.run, executor.workerOptions, container.redis as any);
+        const worker = this.createWorker(executor.queue, executor.workerOptions);
         this.workers.set(executor.queue, worker);
 
         return this;
     }
 
-    public async _unregister(handler: JobExecutor<QueueName>): Promise<this> {
+    public async _unregister(handler: TaskWorker<QueueName>): Promise<this> {
         const worker = this.workers.get(handler.queue);
 
         if (worker) {
@@ -57,7 +91,9 @@ export class TaskHandlerRegistry implements HandlerRegistry<JobExecutor<QueueNam
 
         const context = {
             logger: container.logger.child({
-                task: executor.queue,
+                type: 'task',
+                queue: executor.queue,
+                jobName: job.name,
                 jobId: job.id,
             }),
         };
@@ -66,30 +102,32 @@ export class TaskHandlerRegistry implements HandlerRegistry<JobExecutor<QueueNam
         return executor.run(job as any, context);
     }
 
-    public getQueue<QueueT extends QueueName>(queueName: QueueT, options?: QueueOptions): Queue<Queues[QueueT]['payload'], Queues[QueueT]['response']>{
+    public getQueue<QueueT extends QueueName>(
+        queueName: QueueT,
+        options?: QueueOptions,
+    ): Queue<Queues[QueueT]['_payload'], Queues[QueueT]['_response'], Queues[QueueT]['_jobName']> {
         let queue = this.queues.get(queueName);
 
         if (!queue) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            queue = new Queue(queueName, options, container.redis as any);
+            queue = this.createQueue(queueName, options);
             this.queues.set(queueName, queue);
         }
 
-        return queue;
+        return queue as Queue<Queues[QueueT]['_payload'], Queues[QueueT]['_response'], Queues[QueueT]['_jobName']>;
     }
 
     public getWorker(queueName: QueueName): Worker | undefined {
         return this.workers.get(queueName);
     }
 
-    public getFlowProducer(): FlowProducer {
-        if (!this.flowProducer) {
-            this.flowProducer = new FlowProducer({
+    public get flowProducer(): FlowProducer {
+        if (!this._flowProducer) {
+            this._flowProducer = new FlowProducer({
                 connection: container.redis,
             });
         }
 
-        return this.flowProducer;
+        return this._flowProducer;
     }
 
     public async close(): Promise<void> {
@@ -97,9 +135,62 @@ export class TaskHandlerRegistry implements HandlerRegistry<JobExecutor<QueueNam
         await Promise.all([...this.queues.values()].map((queue) => queue.close()));
     }
 
-    public async create<QueueT extends QueueName>(queueName: QueueT, jobName: string, data: Queues[QueueT]['payload'], options?: JobsOptions) {
+    public async create<QueueT extends QueueName>(
+        queueName: QueueT,
+        jobName: Queues[QueueT]['_jobName'],
+        data: Queues[QueueT]['_payload'],
+        options?: JobsOptions,
+    ) {
         const queue = this.getQueue(queueName);
         return queue.add(jobName, data, options);
+    }
+
+    /**
+     * Setup repeating tasks
+     *
+     * This will add the initial jobs to the queue if they don't exist and **remove any jobs that are not in the initial jobs**
+     */
+    public async setupRepeating() {
+        for (const [queueName, executor] of this.executors.entries()) {
+            if (!executor.initialJobs || executor.initialJobs.length === 0) continue;
+
+            const queue = this.getQueue(queueName as QueueName);
+
+            const existingJobs = await queue.getRepeatableJobs();
+
+            const initialJobs = Object.fromEntries(executor.initialJobs.map((job) => [this.getRepeatKey(job.name, job.repeat), job]));
+
+            // if there are jobs in the queue that don't exist in the initial jobs, remove them
+            for (const repeatingJob of existingJobs) {
+                if (!initialJobs[repeatingJob.key]) {
+                    await queue.removeRepeatableByKey(repeatingJob.key);
+                }
+            }
+
+            for (const [key, job] of Object.entries(initialJobs)) {
+                if (!existingJobs.find((repeatingJob) => repeatingJob.key === key)) {
+                    await queue.add(job.name, job.data, {
+                        repeat: job.repeat,
+                        ...job.options,
+                    });
+                }
+            }
+        }
+    }
+
+    /**
+     * Private method from bullmq to get the repeat key
+     * @param name The name of the job
+     * @param repeat The repeat options
+     */
+    private getRepeatKey(name: string, repeat: RepeatOptions) {
+        const endDate = repeat.endDate ? new Date(repeat.endDate).getTime() : '';
+        const tz = repeat.tz || '';
+        const pattern = repeat.pattern;
+        const suffix = (pattern ? pattern : String(repeat.every)) || '';
+        const jobId = repeat.jobId ? repeat.jobId : '';
+
+        return `${name}:${jobId}:${endDate}:${tz}:${suffix}`;
     }
 }
 
@@ -108,8 +199,3 @@ declare module '@peridotjs/framework' {
         tasks: TaskHandlerRegistry;
     }
 }
-
-export interface Queues {
-}
-
-export type QueueName = keyof Queues;
