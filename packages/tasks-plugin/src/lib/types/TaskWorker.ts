@@ -3,13 +3,16 @@ import type { Job, JobsOptions, RepeatOptions, WorkerOptions } from 'bullmq';
 
 import type { QueueEntry, QueueName, Queues } from './Queue.js';
 
+export type TaskWorkerContext = CommonContext;
+
 export type TaskWorker<
     Queue extends QueueName,
+    Context extends TaskWorkerContext = TaskWorkerContext,
     InitialJobs extends TaskWorkerInitialJob<Queue, Queues[Queue]['_jobName']>[] = TaskWorkerInitialJob<Queue, Queues[Queue]['_jobName']>[],
 > = {
     queue: Queue;
     workerOptions?: WorkerOptions;
-    run: TaskWorkerRun<Queue, CommonContext>;
+    run: TaskWorkerRun<Queue, Context>;
 
     /**
      * Initial jobs to be added to the queue when the worker is started, this is useful for repeating tasks
@@ -32,7 +35,7 @@ export type QueueFromJobName<Queue extends QueueName, JobName extends Queues[Que
         : never
     : never;
 
-export type TaskWorkerRun<Queue extends QueueName, Context extends CommonContext> = (
+export type TaskWorkerRun<Queue extends QueueName, Context extends TaskWorkerContext = TaskWorkerContext> = (
     job: Job<Queues[Queue]['_payload'], Queues[Queue]['_response']>,
     ctx: Context,
 ) => Promise<Queues[Queue]['_response']>;

@@ -193,9 +193,3 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<QueueName
         return `${name}:${jobId}:${endDate}:${tz}:${suffix}`;
     }
 }
-
-declare module '@peridotjs/framework' {
-    interface HandlerRegistries {
-        tasks: TaskHandlerRegistry;
-    }
-}
