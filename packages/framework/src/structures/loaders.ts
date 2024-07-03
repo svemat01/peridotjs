@@ -120,7 +120,8 @@ export type HandlerExport = {
  * Avoids the need to cast the handler to the correct type manually.
  */
 export const createHandler = <
-    Kind extends keyof HandlerRegistries extends `${infer K}s` ? K : Kind,
+    _Kind extends keyof HandlerRegistries,
+    Kind extends _Kind extends `${infer K}s` ? K : _Kind,
     T extends HandlerRegistries[Kind extends keyof HandlerRegistries ? Kind : `${Kind}s`] extends HandlerRegistry<infer U> ? U : never,
 >(
     _kind: Kind,
