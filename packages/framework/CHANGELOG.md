@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.2.2
+
+### Patch Changes
+
+-   e80bb7c: Fix error logs
+
 ## 0.2.1
 
 ### Patch Changes
