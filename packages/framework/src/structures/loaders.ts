@@ -114,6 +114,21 @@ export type HandlerExport = {
     [HandlerExportSymbol]: true;
 };
 
+/**
+ * Type-safe handler creation helper.
+ * 
+ * Avoids the need to cast the handler to the correct type manually.
+ */
+export const createHandler = <
+    Kind extends keyof HandlerRegistries extends `${infer K}s` ? K : Kind,
+    T extends HandlerRegistries[Kind extends keyof HandlerRegistries ? Kind : `${Kind}s`] extends HandlerRegistry<infer U> ? U : never,
+>(
+    _kind: Kind,
+    handler: T,
+): T => {
+    return handler;
+};
+
 // #region Registries
 export class TextCommandRegistry implements HandlerRegistry<TextCommand> {
     public readonly name = 'textCommands';
@@ -534,4 +549,4 @@ export const registerBuiltInHandlerRegistries = (manager: HandlerRegistryManager
     manager.registerRegistry(new ModalComponentRegistry());
     manager.registerRegistry(new SelectMenuComponentRegistry());
     manager.registerRegistry(new ClientEventRegistry());
-}
+};
