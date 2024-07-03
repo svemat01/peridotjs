@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.2.4
+
+### Patch Changes
+
+-   881118c: Patch createHandler type issue
+
 ## 0.2.3
 
 ### Patch Changes
