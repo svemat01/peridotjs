@@ -1,12 +1,12 @@
 import type { JobsOptions } from 'bullmq';
 
-import type { QueueName } from './Queue.js';
+import type { QueueName, Queues } from './Queue.js';
 
 export interface FlowJobBase<
     Options,
     Queue extends QueueName,
-    DataType = unknown,
-    NameType extends string = string,
+    DataType = Queues[Queue]['_payload'],
+    NameType extends string = Queues[Queue]['_jobName'],
     Children extends FlowChildJob[] = FlowChildJob[],
 > {
     name: NameType;
@@ -22,3 +22,5 @@ export type FlowChildJob<Queue extends QueueName = QueueName, DataType = unknown
     DataType,
     NameType
 >;
+
+export type FlowJob<Queue extends QueueName> = FlowJobBase<JobsOptions, Queue>;

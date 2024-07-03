@@ -8,10 +8,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@peridotjs/framework": "workspace:*",
-    "@sapphire/utilities": "^3.16.2",
-    "bullmq": "^5.8.3",
-    "ioredis": "^5.4.1"
+    "discord.js": "^14.15.2",
+    "@sapphire/utilities": "^3.16.2"
   },
   "devDependencies": {
     "@discordjs/docgen": "^0.12.1",
@@ -26,7 +24,9 @@
     "typescript-eslint": "^7.10.0"
   },
   "peerDependencies": {
-    "discord.js": "^14.15.2"
+    "@peridotjs/framework": "workspace:*",
+    "bullmq": "^5.8.3",
+    "ioredis": "^5.4.1"
   },
   "exports": {
     ".": {

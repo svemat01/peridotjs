@@ -6,7 +6,6 @@ import {
     type JobsOptions,
     Queue,
     type QueueOptions,
-    RedisConnection,
     type RepeatOptions,
     Worker,
     type WorkerOptions,
@@ -16,7 +15,9 @@ import { TaskEvents } from './types/Events.js';
 import type { QueueName, Queues } from './types/Queue.js';
 import type { TaskWorker } from './types/TaskWorker.js';
 
-export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<QueueName>> {
+// @ts-expect-error When no queues are defined, the queue keys will be inferred as never which breaks the types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<any>> {
     public readonly name = 'tasks';
 
     private workers = new Map<string, Worker>();
@@ -26,7 +27,10 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<QueueName
     private _flowProducer: FlowProducer | null = null;
 
     private createWorker(queue: QueueName, workerOptions?: WorkerOptions): Worker {
-        const worker = new Worker(queue, this.run, workerOptions, container.redis as unknown as typeof RedisConnection);
+        const worker = new Worker(queue, this.run, {
+            ...workerOptions,
+            connection: container.redis,
+        });
 
         worker.on('active', (...args) => container.client.emit(TaskEvents.WorkerActive, queue, ...args));
         worker.on('closed', (...args) => container.client.emit(TaskEvents.WorkerClosed, queue, ...args));
@@ -45,7 +49,10 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<QueueName
     }
 
     private createQueue(queueName: QueueName, queueOptions?: QueueOptions): Queue {
-        const queue = new Queue(queueName, queueOptions, container.redis as unknown as typeof RedisConnection);
+        const queue = new Queue(queueName, {
+            ...queueOptions,
+            connection: container.redis,
+        });
 
         queue.on('cleaned', (...args) => container.client.emit(TaskEvents.QueueCleaned, queueName, ...args));
         queue.on('error', (...args) => container.client.emit(TaskEvents.QueueError, queueName, ...args));
@@ -57,15 +64,19 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<QueueName
         return queue;
     }
 
-    public _register(executor: TaskWorker<QueueName>): this {
-        this.executors.set(executor.queue, executor);
-        const worker = this.createWorker(executor.queue, executor.workerOptions);
+    // @ts-expect-error When no queues are defined, the queue keys will be inferred as never which breaks the types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public _register(executor: TaskWorker<any>): this {
+        this.executors.set(executor.queue, executor as unknown as TaskWorker<QueueName>);
+        const worker = this.createWorker(executor.queue as QueueName, executor.workerOptions);
         this.workers.set(executor.queue, worker);
 
         return this;
     }
 
-    public async _unregister(handler: TaskWorker<QueueName>): Promise<this> {
+    // @ts-expect-error When no queues are defined, the queue keys will be inferred as never which breaks the types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public async _unregister(handler: TaskWorker<any>): Promise<this> {
         const worker = this.workers.get(handler.queue);
 
         if (worker) {
@@ -79,7 +90,9 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<QueueName
     }
 
     public _unregisterAll(): Awaitable<this> {
-        return Promise.all([...this.executors.values()].map((executor) => this._unregister(executor))).then(() => this);
+        // @ts-expect-error When no queues are defined, the queue keys will be inferred as never which breaks the types
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return Promise.all([...this.executors.values()].map((executor) => this._unregister(executor as unknown as TaskWorker<any>))).then(() => this);
     }
 
     private async run(job: Job) {
@@ -112,7 +125,6 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<QueueName
             queue = this.createQueue(queueName, options);
             this.queues.set(queueName, queue);
         }
-
         return queue as Queue<Queues[QueueT]['_payload'], Queues[QueueT]['_response'], Queues[QueueT]['_jobName']>;
     }
 
