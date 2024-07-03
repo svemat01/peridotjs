@@ -1,5 +1,13 @@
 # @peridotjs/plugin-tasks
 
+## 0.0.7
+
+### Patch Changes
+
+-   4c58493: Shift around dependencies and fix types for flowjob and registry
+-   Updated dependencies [214d314]
+    -   @peridotjs/framework@0.2.5
+
 ## 0.0.6
 
 ### Patch Changes
