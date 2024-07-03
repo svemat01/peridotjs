@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.2.1
+
+### Patch Changes
+
+-   f52b5ee: Patch types
+
 ## 0.2.0
 
 ### Minor Changes
