@@ -1,5 +1,13 @@
 # @peridotjs/plugin-tasks
 
+## 0.0.5
+
+### Patch Changes
+
+-   aaa7aab: Improve task context type and patch types
+-   Updated dependencies [fe93ca3]
+    -   @peridotjs/framework@0.2.3
+
 ## 0.0.4
 
 ### Patch Changes

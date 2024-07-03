@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.2.3
+
+### Patch Changes
+
+-   fe93ca3: Introduce handler creator helper function `createHandler`
+
 ## 0.2.2
 
 ### Patch Changes
