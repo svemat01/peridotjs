@@ -897,13 +897,6 @@ export const registerEvents = () => {
                 });
         }
 
-        if (error instanceof Error) {
-            error = {
-                message: error.message,
-                name: error.name,
-            };
-        }
-
         logger.error({ err: error, parameters, duration }, 'TextCommandError');
     });
     client.on(Events.UnknownTextCommandName, ({ message, commandPrefix, prefix }) => {
@@ -950,13 +943,6 @@ export const registerEvents = () => {
             }
         }
 
-        if (error instanceof Error) {
-            error = {
-                message: error.message,
-                name: error.name,
-            };
-        }
-
         logger.error({ err: error, duration }, 'Unknown Error');
     });
     client.on(Events.UnknownSlashCommand, ({ interaction }) => {
@@ -991,13 +977,6 @@ export const registerEvents = () => {
             } catch (err) {
                 logger.error({ err }, 'Failed to handle user error');
             }
-        }
-
-        if (error instanceof Error) {
-            error = {
-                message: error.message,
-                name: error.name,
-            };
         }
 
         logger.error({ err: error, duration }, 'Unknown Error');
@@ -1036,13 +1015,6 @@ export const registerEvents = () => {
             }
         }
 
-        if (error instanceof Error) {
-            error = {
-                message: error.message,
-                name: error.name,
-            };
-        }
-
         logger.error({ err: error, duration }, 'Unknown Error');
     });
     client.on(Events.UnknownButtonInteraction, ({ interaction }) => {
@@ -1079,13 +1051,6 @@ export const registerEvents = () => {
             }
         }
 
-        if (error instanceof Error) {
-            error = {
-                message: error.message,
-                name: error.name,
-            };
-        }
-
         logger.error({ err: error, duration }, 'Unknown Error');
     });
     client.on(Events.UnknownSelectMenuInteraction, ({ interaction }) => {
@@ -1120,13 +1085,6 @@ export const registerEvents = () => {
             } catch (err) {
                 logger.error({ err }, 'Failed to handle user error');
             }
-        }
-
-        if (error instanceof Error) {
-            error = {
-                message: error.message,
-                name: error.name,
-            };
         }
 
         logger.error({ err: error, duration }, 'Unknown Error');
