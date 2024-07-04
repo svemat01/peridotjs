@@ -1,12 +1,8 @@
 {
   "name": "@peridotjs/plugin-tasks",
   "description": "",
-  "author": "Jakob Helgesson",
   "version": "0.0.7",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
+  "author": "Jakob Helgesson",
   "dependencies": {
     "@sapphire/utilities": "^3.16.2",
     "discord.js": "^14.15.2"
@@ -23,40 +19,44 @@
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.10.0"
   },
-  "peerDependencies": {
-    "@peridotjs/framework": "workspace:*",
-    "bullmq": "^5.8.3",
-    "ioredis": "^5.4.1"
-  },
   "exports": {
     ".": {
-      "import": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
     },
     "./register": {
-      "import": "./dist/src/register.js",
-      "types": "./dist/src/register.d.ts"
+      "types": "./dist/src/register.d.ts",
+      "import": "./dist/src/register.js"
     }
   },
-  "keywords": [],
-  "license": "MIT",
-  "main": "dist/src/index.js",
   "files": [
     "dist/src",
     "README.md",
     "CHANGELOG.md",
     "package.json"
   ],
-  "scripts": {
-    "lint": "eslint",
-    "build": "tsc -p tsconfig.json"
-  },
-  "type": "module",
+  "keywords": [],
+  "license": "MIT",
   "madge": {
     "detectiveOptions": {
       "ts": {
         "skipTypeImports": true
       }
     }
-  }
+  },
+  "main": "dist/src/index.js",
+  "peerDependencies": {
+    "@peridotjs/framework": "workspace:*",
+    "bullmq": "^5.8.3",
+    "ioredis": "^5.4.1"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint"
+  },
+  "type": "module"
 }

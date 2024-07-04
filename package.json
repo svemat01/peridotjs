@@ -3,16 +3,17 @@
   "description": "",
   "version": "0.0.0",
   "author": "",
+  "dependencies": {
+    "@changesets/cli": "^2.27.1"
+  },
   "devDependencies": {
     "@moonrepo/cli": "^1.26.6",
     "syncpack": "^12.3.2"
   },
-  "dependencies": {
-    "@changesets/cli": "^2.27.1"
-  },
   "keywords": [],
   "license": "ISC",
   "main": "index.js",
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
     "publish": "moon ci :build && changeset publish"
   },
@@ -30,6 +31,5 @@
       }
     ]
   },
-  "type": "module",
-  "packageManager": "pnpm@9.0.0"
+  "type": "module"
 }

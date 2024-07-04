@@ -3,10 +3,6 @@
   "description": "",
   "version": "0.0.0",
   "author": "Jakob Helgesson",
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
   "devDependencies": {
     "@sapphire/prettier-config": "^2.0.0",
     "@sapphire/ts-config": "^5.0.1",
@@ -15,6 +11,10 @@
   "keywords": [],
   "license": "ISC",
   "main": "index.js",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
