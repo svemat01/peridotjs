@@ -8,8 +8,8 @@
     "access": "public"
   },
   "dependencies": {
-    "discord.js": "^14.15.2",
-    "@sapphire/utilities": "^3.16.2"
+    "@sapphire/utilities": "^3.16.2",
+    "discord.js": "^14.15.2"
   },
   "devDependencies": {
     "@discordjs/docgen": "^0.12.1",
