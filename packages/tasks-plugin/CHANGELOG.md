@@ -1,5 +1,11 @@
 # @peridotjs/plugin-tasks
 
+## 0.0.10
+
+### Patch Changes
+
+-   17e9343: Fix worker options type to not require connection
+
 ## 0.0.9
 
 ### Patch Changes
