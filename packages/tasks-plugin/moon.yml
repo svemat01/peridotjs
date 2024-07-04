@@ -9,7 +9,10 @@ tasks:
       - 'README.md'
       - 'tsconfig.json'
       - 'src/**/*'
+      - 'moon.yml'
     outputs:
       - 'dist'
+    deps:
+      - '^:build'
 dependsOn:
   - '@peridotjs/framework'
