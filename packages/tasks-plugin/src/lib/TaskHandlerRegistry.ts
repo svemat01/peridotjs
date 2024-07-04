@@ -1,15 +1,6 @@
 import { container, type HandlerRegistry } from '@peridotjs/framework';
 import type { Awaitable } from '@sapphire/utilities';
-import {
-    FlowProducer,
-    Job,
-    type JobsOptions,
-    Queue,
-    type QueueOptions,
-    type RepeatOptions,
-    Worker,
-    type WorkerOptions,
-} from 'bullmq';
+import { FlowProducer, Job, type JobsOptions, Queue, type QueueOptions, type RepeatOptions, Worker, type WorkerOptions } from 'bullmq';
 
 import { TaskEvents } from './types/Events.js';
 import type { QueueName, Queues } from './types/Queue.js';
@@ -27,7 +18,7 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<any>> {
     private _flowProducer: FlowProducer | null = null;
 
     private createWorker(queue: QueueName, workerOptions?: WorkerOptions): Worker {
-        const worker = new Worker(queue, this.run, {
+        const worker = new Worker(queue, this.run.bind(this), {
             ...workerOptions,
             connection: container.redis,
         });
