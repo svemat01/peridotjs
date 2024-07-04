@@ -1,5 +1,11 @@
 # @peridotjs/plugin-tasks
 
+## 0.0.8
+
+### Patch Changes
+
+-   7cdc268: Fix `this` mismatch issue with worker runner
+
 ## 0.0.7
 
 ### Patch Changes
