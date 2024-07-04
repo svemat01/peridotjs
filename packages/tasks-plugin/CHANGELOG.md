@@ -1,5 +1,11 @@
 # @peridotjs/plugin-tasks
 
+## 0.0.9
+
+### Patch Changes
+
+-   c900098: Rerelease since last release didn't include files due to ci/cd issue
+
 ## 0.0.8
 
 ### Patch Changes
