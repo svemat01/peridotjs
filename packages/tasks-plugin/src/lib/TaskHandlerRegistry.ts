@@ -17,7 +17,7 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<any>> {
 
     private _flowProducer: FlowProducer | null = null;
 
-    private createWorker(queue: QueueName, workerOptions?: WorkerOptions): Worker {
+    private createWorker(queue: QueueName, workerOptions?: Omit<WorkerOptions, 'connection'>): Worker {
         const worker = new Worker(queue, this.run.bind(this), {
             ...workerOptions,
             connection: container.redis,
@@ -39,7 +39,7 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<any>> {
         return worker;
     }
 
-    private createQueue(queueName: QueueName, queueOptions?: QueueOptions): Queue {
+    private createQueue(queueName: QueueName, queueOptions?: Omit<QueueOptions, 'connection'>): Queue {
         const queue = new Queue(queueName, {
             ...queueOptions,
             connection: container.redis,
@@ -108,7 +108,7 @@ export class TaskHandlerRegistry implements HandlerRegistry<TaskWorker<any>> {
 
     public getQueue<QueueT extends QueueName>(
         queueName: QueueT,
-        options?: QueueOptions,
+        options?: Omit<QueueOptions, 'connection'>,
     ): Queue<Queues[QueueT]['_payload'], Queues[QueueT]['_response'], Queues[QueueT]['_jobName']> {
         let queue = this.queues.get(queueName);
 

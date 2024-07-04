@@ -11,7 +11,7 @@ export type TaskWorker<
     InitialJobs extends TaskWorkerInitialJob<Queue, Queues[Queue]['_jobName']>[] = TaskWorkerInitialJob<Queue, Queues[Queue]['_jobName']>[],
 > = {
     queue: Queue;
-    workerOptions?: WorkerOptions;
+    workerOptions?: Omit<WorkerOptions, 'connection'>;
     run: TaskWorkerRun<Queue, Context>;
 
     /**
