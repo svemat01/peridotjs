@@ -2,7 +2,6 @@
 
 import eslint from '@eslint/js';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
-// @ts-expect-error - no types
 import unusedImports from 'eslint-plugin-unused-imports';
 import tseslint from 'typescript-eslint';
 
