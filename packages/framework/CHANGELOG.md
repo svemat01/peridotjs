@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.2.6
+
+### Patch Changes
+
+-   3b3b6df: Update deps
+
 ## 0.2.5
 
 ### Patch Changes
