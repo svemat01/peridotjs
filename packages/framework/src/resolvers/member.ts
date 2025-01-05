@@ -1,4 +1,4 @@
-import { SnowflakeRegex, UserOrMemberMentionRegex } from '@sapphire/discord-utilities';
+import { SnowflakeRegex, UserOrMemberMentionRegex } from '@sapphire/discord.js-utilities';
 import { Result } from '@sapphire/result';
 import { isNullish } from '@sapphire/utilities';
 import type { Guild, GuildMember, Snowflake } from 'discord.js';

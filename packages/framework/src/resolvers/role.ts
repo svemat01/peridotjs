@@ -1,4 +1,4 @@
-import { RoleMentionRegex, SnowflakeRegex } from '@sapphire/discord-utilities';
+import { RoleMentionRegex, SnowflakeRegex } from '@sapphire/discord.js-utilities';
 import { Result } from '@sapphire/result';
 import type { Guild, Role, Snowflake } from 'discord.js';
 

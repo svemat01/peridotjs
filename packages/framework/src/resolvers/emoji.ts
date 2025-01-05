@@ -1,4 +1,4 @@
-import { EmojiRegex, TwemojiRegex } from '@sapphire/discord-utilities';
+import { EmojiRegex, TwemojiRegex } from '@sapphire/discord.js-utilities';
 import { Result } from '@sapphire/result';
 import { parseEmoji } from 'discord.js';
 

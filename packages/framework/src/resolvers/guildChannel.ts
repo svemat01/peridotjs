@@ -1,5 +1,5 @@
 import type { GuildBasedChannelTypes } from '@sapphire/discord.js-utilities';
-import { ChannelMentionRegex, SnowflakeRegex } from '@sapphire/discord-utilities';
+import { ChannelMentionRegex, SnowflakeRegex } from '@sapphire/discord.js-utilities';
 import { Result } from '@sapphire/result';
 import type { Guild, Snowflake } from 'discord.js';
 

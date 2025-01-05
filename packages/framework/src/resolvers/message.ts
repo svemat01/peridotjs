@@ -9,7 +9,7 @@ import {
     isTextChannel,
     type TextBasedChannelTypes,
 } from '@sapphire/discord.js-utilities';
-import { ChannelMessageRegex, MessageLinkRegex, SnowflakeRegex } from '@sapphire/discord-utilities';
+import { ChannelMessageRegex, MessageLinkRegex, SnowflakeRegex } from '@sapphire/discord.js-utilities';
 import { Result } from '@sapphire/result';
 import type { Awaitable } from '@sapphire/utilities';
 import { type Message, PermissionFlagsBits, type Snowflake, type User } from 'discord.js';

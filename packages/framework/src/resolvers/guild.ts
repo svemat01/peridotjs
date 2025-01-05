@@ -1,4 +1,4 @@
-import { SnowflakeRegex } from '@sapphire/discord-utilities';
+import { SnowflakeRegex } from '@sapphire/discord.js-utilities';
 import { Result } from '@sapphire/result';
 import type { Guild } from 'discord.js';
 

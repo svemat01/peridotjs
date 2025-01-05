@@ -1,4 +1,4 @@
-import { SnowflakeRegex, UserOrMemberMentionRegex } from '@sapphire/discord-utilities';
+import { SnowflakeRegex, UserOrMemberMentionRegex } from '@sapphire/discord.js-utilities';
 import { Result } from '@sapphire/result';
 import type { Snowflake, User } from 'discord.js';
 

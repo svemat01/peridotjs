@@ -1,4 +1,4 @@
-import { isDMChannel } from '@sapphire/discord.js-utilities';
+import { isDMChannel, isGroupChannel } from '@sapphire/discord.js-utilities';
 import type { Message } from 'discord.js';
 import { PermissionFlagsBits, PermissionsBitField } from 'discord.js';
 
@@ -38,7 +38,7 @@ export async function onMessageCreate(message: Message): Promise<void> {
 }
 
 async function canRunInChannel(message: Message): Promise<boolean> {
-    if (isDMChannel(message.channel)) return true;
+    if (isDMChannel(message.channel) || isGroupChannel(message.channel)) return true;
 
     const me = await message.guild?.members.fetchMe();
     if (!me) return false;
