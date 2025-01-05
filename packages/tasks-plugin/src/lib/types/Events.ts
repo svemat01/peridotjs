@@ -58,11 +58,11 @@ declare module 'discord.js' {
         [TaskEvents.WorkerResumed]: [queue: QueueName, ...args: Parameters<WorkerListener<unknown, unknown, string>['resumed']>];
         [TaskEvents.WorkerStalled]: [queue: QueueName, ...args: Parameters<WorkerListener<unknown, unknown, string>['stalled']>];
 
-        [TaskEvents.QueueCleaned]: [queue: QueueName, ...args: Parameters<QueueListener<unknown, unknown, string>['cleaned']>];
-        [TaskEvents.QueueError]: [queue: QueueName, ...args: Parameters<QueueListener<unknown, unknown, string>['error']>];
-        [TaskEvents.QueuePaused]: [queue: QueueName, ...args: Parameters<QueueListener<unknown, unknown, string>['paused']>];
-        [TaskEvents.QueueProgress]: [queue: QueueName, ...args: Parameters<QueueListener<unknown, unknown, string>['progress']>];
-        [TaskEvents.QueueRemoved]: [queue: QueueName, ...args: Parameters<QueueListener<unknown, unknown, string>['removed']>];
-        [TaskEvents.QueueWaiting]: [queue: QueueName, ...args: Parameters<QueueListener<unknown, unknown, string>['waiting']>];
+        [TaskEvents.QueueCleaned]: [queue: QueueName, ...args: Parameters<QueueListener['cleaned']>];
+        [TaskEvents.QueueError]: [queue: QueueName, ...args: Parameters<QueueListener['error']>];
+        [TaskEvents.QueuePaused]: [queue: QueueName, ...args: Parameters<QueueListener['paused']>];
+        [TaskEvents.QueueProgress]: [queue: QueueName, ...args: Parameters<QueueListener['progress']>];
+        [TaskEvents.QueueRemoved]: [queue: QueueName, ...args: Parameters<QueueListener['removed']>];
+        [TaskEvents.QueueWaiting]: [queue: QueueName, ...args: Parameters<QueueListener['waiting']>];
     }
 }

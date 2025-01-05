@@ -8,7 +8,7 @@ import { registerTaskEventListeners } from './lib/listeners.js';
 import { TaskHandlerRegistry } from './lib/TaskHandlerRegistry.js';
 
 export class TasksPlugin extends Plugin {
-    public static [preGenericsInitialization](this: PeridotClient, options: ClientOptions): void {
+    public static override [preGenericsInitialization](this: PeridotClient, options: ClientOptions): void {
         if (options.redis instanceof Redis) {
             container.redis = options.redis;
         } else {
@@ -23,7 +23,7 @@ export class TasksPlugin extends Plugin {
         }
     }
 
-    public static [postLogin](this: PeridotClient): void {
+    public static override [postLogin](this: PeridotClient): void {
         void container.tasks.setupRepeating();
     }
 }
