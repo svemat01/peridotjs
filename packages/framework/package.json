@@ -1,7 +1,7 @@
 {
     "name": "@peridotjs/framework",
     "description": "",
-    "version": "0.2.6",
+    "version": "0.2.7",
     "author": "Jakob Helgesson",
     "dependencies": {
         "@sapphire/discord.js-utilities": "^7.3.2",

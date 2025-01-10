@@ -1,5 +1,12 @@
 # @peridotjs/plugin-tasks
 
+## 0.0.12
+
+### Patch Changes
+
+-   Updated dependencies [f5397cc]
+    -   @peridotjs/framework@0.2.7
+
 ## 0.0.11
 
 ### Patch Changes
