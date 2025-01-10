@@ -116,7 +116,7 @@ export type HandlerExport = {
 
 /**
  * Type-safe handler creation helper.
- * 
+ *
  * Avoids the need to cast the handler to the correct type manually.
  */
 export const createHandler = <

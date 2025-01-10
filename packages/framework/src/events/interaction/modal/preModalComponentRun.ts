@@ -1,7 +1,6 @@
+import { Result } from '@sapphire/result';
 
-import  { Result } from '@sapphire/result';
-
-import  { UserError } from '../../../errors/UserError.js';
+import { UserError } from '../../../errors/UserError.js';
 import { Events, type PreModalSubmitInteractionRunPayload } from '../../index.js';
 
 export async function onPreModalSubmitInteractionRun(payload: PreModalSubmitInteractionRunPayload) {

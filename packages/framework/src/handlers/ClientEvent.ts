@@ -5,9 +5,7 @@ import type { ClientEvents } from 'discord.js';
  * @template T - The type of the client event.
  * @template C - The type of additional context properties.
  */
-export type ClientEventRun<T extends keyof ClientEvents> = (
-    ...args: ClientEvents[T]
-) => void | Promise<void>;
+export type ClientEventRun<T extends keyof ClientEvents> = (...args: ClientEvents[T]) => void | Promise<void>;
 
 /**
  * Represents a client event.

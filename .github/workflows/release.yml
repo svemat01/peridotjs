@@ -19,8 +19,8 @@ jobs:
 
             - uses: "moonrepo/setup-toolchain@v0"
               with:
-                auto-install: true
-                cache: false # The cache seems to be broken for some reason
+                  auto-install: true
+                  cache: false # The cache seems to be broken for some reason
 
             - name: Install Dependencies
               run: pnpm install --frozen-lockfile

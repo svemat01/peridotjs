@@ -16,7 +16,7 @@ export interface CommonContext {
     //  * @throws If accessed without i18n being set on the client.
     //  */
     // i18n: i18n;
-};
+}
 
 declare module 'i18next' {
     interface CustomDefaultVariables {

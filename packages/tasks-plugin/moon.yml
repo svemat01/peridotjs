@@ -1,18 +1,18 @@
 platform: node
 
 tasks:
-  build:
-    command: 'pnpm run build'
-    inputs:
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'README.md'
-      - 'tsconfig.json'
-      - 'src/**/*'
-      - 'moon.yml'
-    outputs:
-      - 'dist'
-    deps:
-      - '^:build'
+    build:
+        command: 'pnpm run build'
+        inputs:
+            - 'package.json'
+            - 'pnpm-lock.yaml'
+            - 'README.md'
+            - 'tsconfig.json'
+            - 'src/**/*'
+            - 'moon.yml'
+        outputs:
+            - 'dist'
+        deps:
+            - '^:build'
 dependsOn:
-  - '@peridotjs/framework'
+    - '@peridotjs/framework'

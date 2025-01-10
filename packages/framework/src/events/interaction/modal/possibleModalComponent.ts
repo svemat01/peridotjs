@@ -4,11 +4,7 @@ import { container } from '../../../structures/index.js';
 import { Events } from '../../index.js';
 
 export const onPossibleModalSubmitInteraction = ((interaction) => {
-    const {
-        client,
-        logger,
-        handlers,
-    } = container;
+    const { client, logger, handlers } = container;
 
     const component = handlers.getRegistry('modalComponents').unwrap().getHandler(interaction.customId).unwrapOr(undefined);
 

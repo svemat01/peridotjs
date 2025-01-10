@@ -4,11 +4,7 @@ import { container } from '../../../structures/index.js';
 import { Events } from '../../index.js';
 
 export const onPossibleContextMenuCommand = ((interaction) => {
-    const {
-        client,
-        logger,
-        handlers,
-    } = container;
+    const { client, logger, handlers } = container;
 
     const command = handlers.getRegistry('contextMenuCommands').unwrap().getHandler(interaction.commandName).unwrapOr(undefined);
     if (!command) {

@@ -6,10 +6,7 @@ import { container } from '../../../structures/index.js';
 import { Events } from '../../index.js';
 
 export async function onPossibleAutocompleteInteraction(interaction: AutocompleteInteraction) {
-    const {
-        client,
-        handlers,
-    } = container;
+    const { client, handlers } = container;
 
     const command = handlers.getRegistry('slashCommands').unwrap().getHandler(interaction.commandName).unwrapOr(undefined);
     if (!command || !command.autocomplete) {

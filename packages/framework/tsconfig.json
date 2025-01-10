@@ -1,7 +1,7 @@
 {
     "extends": "@peridotjs/base/tsconfig.base.json",
-    "include": [ "src" ],
+    "include": ["src"],
     "compilerOptions": {
-        "outDir": "dist",
+        "outDir": "dist"
     }
 }

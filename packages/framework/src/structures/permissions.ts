@@ -32,7 +32,7 @@ export enum PermissionLevel {
 
 /**
  * Represents the configuration for permission levels.
- * 
+ *
  * @example
  * ```typescript
  * {
@@ -49,14 +49,14 @@ export enum PermissionLevel {
 export type PermissionLevelConfig = {
     /**
      * The global permission level for each user.
-     * 
+     *
      * User ID -> Permission Level
      */
     global: Record<Snowflake, PermissionLevel>;
-    
+
     /**
      * The permission level map for each guild.
-     * 
+     *
      * Guild ID -> Role ID -> Permission Level
      */
     guilds: Record<Snowflake, Record<Snowflake, PermissionLevel>>;
@@ -68,10 +68,7 @@ export type PermissionLevelConfig = {
  * @param config - The configuration object containing global and guild-specific permission levels.
  * @returns The permission level of the member.
  */
-export const getPermissionLevel = (
-    member: GuildMember | null,
-    config: PermissionLevelConfig,
-): PermissionLevel => {
+export const getPermissionLevel = (member: GuildMember | null, config: PermissionLevelConfig): PermissionLevel => {
     if (!member) return PermissionLevel.REGULAR; // Return Regular perm if no member
 
     const defaultRole = PermissionLevel.REGULAR;

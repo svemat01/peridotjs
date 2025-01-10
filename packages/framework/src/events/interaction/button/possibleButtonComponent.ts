@@ -4,11 +4,7 @@ import { container } from '../../../structures/index.js';
 import { Events } from '../../index.js';
 
 export const onPossibleButtonInteraction = ((interaction) => {
-    const {
-        client,
-        logger,
-        handlers,
-    } = container;
+    const { client, logger, handlers } = container;
 
     const component = handlers.getRegistry('buttonComponents').unwrap().getHandler(interaction.customId).unwrapOr(undefined);
 

@@ -13,7 +13,7 @@ export type ContextMenuCommandContext<T extends Record<string, unknown> = Record
 
 export type ContextMenuCommand =
     | {
-          type: ApplicationCommandType.User
+          type: ApplicationCommandType.User;
 
           data: UserApplicationCommandData;
           guilds: Snowflake[] | 'global';
@@ -29,6 +29,12 @@ export type ContextMenuCommand =
           run: MessageContextMenuCommandRun;
       };
 
-export type UserContextMenuCommandRun<T extends Record<string, unknown> = Record<string, unknown> > = (interaction: UserContextMenuCommandInteraction, ctx: ContextMenuCommandContext<T>) => Promise<void> | void;
+export type UserContextMenuCommandRun<T extends Record<string, unknown> = Record<string, unknown>> = (
+    interaction: UserContextMenuCommandInteraction,
+    ctx: ContextMenuCommandContext<T>,
+) => Promise<void> | void;
 
-export type MessageContextMenuCommandRun<T extends Record<string, unknown> = Record<string, unknown>> = (interaction: MessageContextMenuCommandInteraction, ctx: ContextMenuCommandContext<T>) => Promise<void> | void;
+export type MessageContextMenuCommandRun<T extends Record<string, unknown> = Record<string, unknown>> = (
+    interaction: MessageContextMenuCommandInteraction,
+    ctx: ContextMenuCommandContext<T>,
+) => Promise<void> | void;

@@ -1,8 +1,7 @@
 import { Result } from '@sapphire/result';
 import { Stopwatch } from '@sapphire/stopwatch';
 
-import { type ContextMenuCommandAcceptedPayload,Events } from '../../index.js';
-
+import { type ContextMenuCommandAcceptedPayload, Events } from '../../index.js';
 
 export async function onContextMenuCommandAccepted(payload: ContextMenuCommandAcceptedPayload) {
     const { interaction, command, logger } = payload;
@@ -10,7 +9,7 @@ export async function onContextMenuCommandAccepted(payload: ContextMenuCommandAc
     logger.trace('ContextMenuCommandAccepted');
 
     const result = await Result.fromAsync(async () => {
-        interaction.client.emit(Events.ContextMenuCommandRun, interaction, command,  payload);
+        interaction.client.emit(Events.ContextMenuCommandRun, interaction, command, payload);
         if (command.type !== interaction.commandType) {
             throw new Error(`Expected command type ${command.type}, got ${interaction.commandType}`);
         }
