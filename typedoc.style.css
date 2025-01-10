@@ -1,0 +1,4 @@
+/* Fix for search input */
+#tsd-search.has-focus .field input {
+    top: 0 !important;
+}

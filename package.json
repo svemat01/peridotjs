@@ -8,7 +8,9 @@
   },
   "devDependencies": {
     "@moonrepo/cli": "^1.26.6",
-    "syncpack": "^12.3.2"
+    "syncpack": "^12.3.2",
+    "typedoc": "^0.27.6",
+    "typedoc-material-theme": "^1.2.0"
   },
   "keywords": [],
   "license": "ISC",
