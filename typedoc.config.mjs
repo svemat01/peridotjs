@@ -8,6 +8,7 @@ const config = {
     packageOptions: {
         includeVersion: true,
         entryPoints: ["src/"],
+        projectDocuments: ["CHANGELOG.md"],
     },
 
     plugin: ["typedoc-material-theme"],

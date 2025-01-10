@@ -16,38 +16,139 @@ import type { ApplicationCommandOptionType } from 'discord.js';
 
 import type { CommonContext } from './index.js';
 
+/**
+ * Context object passed to slash command handlers.
+ * @since 0.2.6
+ * @category Commands
+ * @template T - Additional context properties specific to this slash command
+ */
 export type SlashCommandContext<T extends Record<string, unknown> = Record<string, unknown>> = CommonContext & T;
 
+/**
+ * Function signature for slash command handlers.
+ * @since 0.2.6
+ * @category Commands
+ * @template T - Additional context properties specific to this slash command
+ * @example
+ * ```typescript
+ * const handler: SlashCommandRun = async (interaction, ctx) => {
+ *   const input = interaction.options.getString('input', true);
+ *   await interaction.reply(`You provided: ${input}`);
+ * };
+ * ```
+ * @see {@link https://discord.js.org/#/docs/discord.js/main/class/ChatInputCommandInteraction}
+ */
 export type SlashCommandRun<T extends Record<string, unknown> = Record<string, unknown>> = (
     interaction: ChatInputCommandInteraction,
     ctx: SlashCommandContext<T>,
 ) => Promise<void>;
 
+/**
+ * Context object passed to autocomplete handlers.
+ * @since 0.2.6
+ * @category Commands
+ * @template T - Additional context properties specific to this autocomplete handler
+ */
 export type AutoCompleteContext<T extends Record<string, unknown> = Record<string, unknown>> = CommonContext & T;
 
+/**
+ * Function signature for autocomplete handlers.
+ * @since 0.2.6
+ * @category Commands
+ * @template T - Additional context properties specific to this autocomplete handler
+ * @example
+ * ```typescript
+ * const handler: AutoCompleteRun = async (interaction, ctx) => {
+ *   const focused = interaction.options.getFocused(true);
+ *   await interaction.respond([
+ *     { name: 'Option 1', value: 'option1' },
+ *     { name: 'Option 2', value: 'option2' }
+ *   ]);
+ * };
+ * ```
+ * @see {@link https://discord.js.org/#/docs/discord.js/main/class/AutocompleteInteraction}
+ */
 export type AutoCompleteRun<T extends Record<string, unknown> = Record<string, unknown>> = (
     interaction: AutocompleteInteraction,
     ctx: AutoCompleteContext<T>,
 ) => Promise<void>;
 
+/**
+ * Represents a slash command handler.
+ * @since 0.2.6
+ * @category Commands
+ * @example
+ * ```typescript
+ * const command: SlashCommand = {
+ *   data: {
+ *     name: 'echo',
+ *     description: 'Repeats your input',
+ *     options: [{
+ *       name: 'input',
+ *       description: 'The text to repeat',
+ *       type: ApplicationCommandOptionType.String,
+ *       required: true
+ *     }]
+ *   },
+ *   guilds: 'global',
+ *   run: async (interaction, ctx) => {
+ *     const input = interaction.options.getString('input', true);
+ *     await interaction.reply(input);
+ *   }
+ * };
+ * ```
+ * @requires Discord.js v14 or higher
+ * @see {@link https://discord.js.org/#/docs/discord.js/main/class/ChatInputCommandInteraction}
+ */
 export type SlashCommand = {
+    /**
+     * Configuration data for the slash command.
+     * Includes name, description, and options.
+     * @see {@link https://discord.js.org/#/docs/discord.js/main/typedef/ChatInputApplicationCommandData}
+     */
     data: ChatInputApplicationCommandData;
 
+    /**
+     * Specifies which guilds this command is available in.
+     * - 'global': Available in all guilds
+     * - Snowflake[]: Only available in the specified guilds
+     */
     guilds: Snowflake[] | 'global';
 
+    /**
+     * The function to execute when the command is used.
+     * @see {@link SlashCommandRun}
+     */
     run: SlashCommandRun;
 
+    /**
+     * Optional handler for autocomplete interactions.
+     * @see {@link AutoCompleteRun}
+     */
     autocomplete?: AutoCompleteRun;
 };
 
-// Extract the options from the data to an object keyed by type and valued by list of option names of that type
+/**
+ * Extracts option types from command data for type-safe option access.
+ * @internal
+ * @category Types
+ */
 type ExtractSlashCommandOptions<T extends ApplicationCommandOption[]> = {
     [K in ApplicationCommandOptionType]: Extract<T[number], { type: K }>['name'];
 };
 
+/**
+ * Helper type for handling readonly arrays.
+ * @internal
+ * @category Types
+ */
 type MaybeReadonly<T> = Readonly<T> | T;
 
-// eslint-disable-next-line unused-imports/no-unused-vars
+/**
+ * Extracts valid subcommand paths from command structure.
+ * @internal
+ * @category Types
+ */
 type ExtractSlashCommandPaths<T extends MaybeReadonly<ApplicationCommandOptionData[]>> =
     T extends MaybeReadonly<[infer F, ...infer R]>
         ? F extends MaybeReadonly<ApplicationCommandSubGroup>
@@ -63,6 +164,14 @@ type ExtractSlashCommandPaths<T extends MaybeReadonly<ApplicationCommandOptionDa
               : never
         : never;
 
+/**
+ * Type-safe wrapper for Discord.js option resolver with improved type inference.
+ * @since 0.2.6
+ * @category Types
+ * @template Options - Array of command options to type against
+ * @template Cached - Cache type for the interaction
+ * @see {@link https://discord.js.org/#/docs/discord.js/main/class/CommandInteractionOptionResolver}
+ */
 type SlashCommandOptionsResolver<Options extends ApplicationCommandOption[], Cached extends CacheType = CacheType> = {
     getSubcommand(required?: true): ExtractSlashCommandOptions<Options>[ApplicationCommandOptionType.Subcommand];
     getSubcommand(required: boolean): ExtractSlashCommandOptions<Options>[ApplicationCommandOptionType.Subcommand] | null;
@@ -77,9 +186,6 @@ type SlashCommandOptionsResolver<Options extends ApplicationCommandOption[], Cac
     ): Extract<
         NonNullable<CommandInteractionOption<Cached>['channel']>,
         {
-            // The `type` property of the PublicThreadChannel class is typed as `ChannelType.PublicThread | ChannelType.AnnouncementThread`
-            // If the user only passed one of those channel types, the Extract<> would have resolved to `never`
-            // Hence the need for this ternary
             type: Type extends ChannelType.PublicThread | ChannelType.AnnouncementThread
                 ? ChannelType.PublicThread | ChannelType.AnnouncementThread
                 : Type;
@@ -92,9 +198,6 @@ type SlashCommandOptionsResolver<Options extends ApplicationCommandOption[], Cac
     ): Extract<
         NonNullable<CommandInteractionOption<Cached>['channel']>,
         {
-            // The `type` property of the PublicThreadChannel class is typed as `ChannelType.PublicThread | ChannelType.AnnouncementThread`
-            // If the user only passed one of those channel types, the Extract<> would have resolved to `never`
-            // Hence the need for this ternary
             type: Type extends ChannelType.PublicThread | ChannelType.AnnouncementThread
                 ? ChannelType.PublicThread | ChannelType.AnnouncementThread
                 : Type;
@@ -143,7 +246,14 @@ type SlashCommandOptionsResolver<Options extends ApplicationCommandOption[], Cac
     ): NonNullable<CommandInteractionOption<Cached>['member' | 'role' | 'user']> | null;
 } & Omit<CommandInteractionOptionResolver<Cached>, 'getMessage' | 'getFocused'>;
 
-// eslint-disable-next-line unused-imports/no-unused-vars
+/**
+ * Type-safe wrapper for Discord.js slash command interaction.
+ * @since 0.2.6
+ * @category Types
+ * @template Options - Array of command options to type against
+ * @template Cached - Cache type for the interaction
+ * @see {@link https://discord.js.org/#/docs/discord.js/main/class/ChatInputCommandInteraction}
+ */
 type SlashCommandInteraction<Options extends ApplicationCommandOption[], Cached extends CacheType = CacheType> = {
     options: SlashCommandOptionsResolver<Options, Cached>;
 } & ChatInputCommandInteraction<Cached>;

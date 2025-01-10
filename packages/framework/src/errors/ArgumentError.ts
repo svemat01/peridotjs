@@ -3,7 +3,7 @@ import { UserError } from './UserError.js';
 
 /**
  * Errors thrown by the argument parser
- * @since 1.0.0
+ * @since 0.2.6
  * @property name This will be `'ArgumentError'` and can be used to distinguish the type of error when any error gets thrown
  */
 export class ArgumentError<T = unknown> extends UserError {
@@ -25,24 +25,24 @@ export class ArgumentError<T = unknown> extends UserError {
 export namespace ArgumentError {
     /**
      * The options for {@link ArgumentError}.
-     * @since 1.0.0
+     * @since 0.2.6
      */
     export type Options<T> = {
         /**
          * The argument that caused the error.
-         * @since 1.0.0
+         * @since 0.2.6
          */
         argument: IArgument<T>;
 
         /**
          * The parameter that failed to be parsed.
-         * @since 1.0.0
+         * @since 0.2.6
          */
         parameter: string;
 
         /**
          * The identifier.
-         * @since 1.0.0
+         * @since 0.2.6
          * @default argument.name
          */
         identifier?: string;

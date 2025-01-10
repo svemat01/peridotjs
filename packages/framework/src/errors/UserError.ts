@@ -40,24 +40,24 @@ export class UserError extends Error {
 export namespace UserError {
     /**
      * The options for {@link UserError}.
-     * @since 1.0.0
+     * @since 0.2.6
      */
     export type Options = {
         /**
          * The identifier for this error.
-         * @since 1.0.0
+         * @since 0.2.6
          */
         identifier: string;
 
         /**
          * The message to be passed to the Error constructor.
-         * @since 1.0.0
+         * @since 0.2.6
          */
         message?: string;
 
         /**
          * The extra context to provide more information about this error.
-         * @since 1.0.0
+         * @since 0.2.6
          * @default null
          */
         context?: unknown;

@@ -11,173 +11,225 @@ import type { PermissionLevelConfig } from './permissions.js';
 import { Plugin, PluginHook, PluginManager } from './plugins.js';
 
 /**
- * A valid prefix in Peridot.
- * * `string`: a single prefix, e.g. `'!'`.
- * * `string[]`: an array of prefixes, e.g. `['!', '.']`.
- * * `null`: disabled prefix, locks the bot's command usage to mentions only.
+ * Valid prefix types for command recognition.
+ * @since 0.2.6
+ * @category Client
+ * @example
+ * ```typescript
+ * // Single prefix
+ * const prefix: PeridotPrefix = '!';
+ *
+ * // Multiple prefixes
+ * const prefixes: PeridotPrefix = ['!', '?', '.'];
+ *
+ * // Mention only (no prefix)
+ * const noPrefix: PeridotPrefix = null;
+ * ```
  */
 export type PeridotPrefix = string | readonly string[] | null;
 
+/**
+ * Function type for dynamically determining command prefixes.
+ * @since 0.2.6
+ * @category Client
+ * @example
+ * ```typescript
+ * const prefixHook: PeridotPrefixHook = async (message) => {
+ *   // Get prefix from database based on guild
+ *   const prefix = await db.getPrefix(message.guild.id);
+ *   return prefix ?? '!'; // Fallback to ! if no prefix set
+ * };
+ * ```
+ */
 export type PeridotPrefixHook = {
     (message: TextCommandMessage): Awaitable<PeridotPrefix>;
 };
 
+/**
+ * Configuration options for the Peridot client.
+ * Extends Discord.js ClientOptions with additional Peridot-specific options.
+ * @since 0.2.6
+ * @category Client
+ * @example
+ * ```typescript
+ * const options: PeridotClientOptions = {
+ *   defaultPrefix: '!',
+ *   regexPrefix: /^(hey +)?bot[,! ]/i,
+ *   logger: pino(),
+ *   i18n: i18next,
+ *   typing: true,
+ *   permissionConfig: {
+ *     global: {},
+ *     guilds: {}
+ *   }
+ * };
+ * ```
+ */
 export interface PeridotClientOptions {
     /**
-     * The default prefix, in case of `null`, only mention prefix will trigger the bot's commands.
-     * @since 1.0.0
+     * The default command prefix.
+     * @since 0.2.6
      * @default null
+     * @example '!' or ['!', '?'] or null
      */
     defaultPrefix?: PeridotPrefix;
 
     /**
-     * The regex prefix, an alternative to a mention or regular prefix to allow creating natural language command messages
-     * @since 1.0.0
+     * Regex pattern for natural language command prefixes.
+     * @since 0.2.6
      * @example
      * ```typescript
      * /^(hey +)?bot[,! ]/i
-     *
-     * // Matches:
-     * // - hey bot,
-     * // - hey bot!
-     * // - hey bot
-     * // - bot,
-     * // - bot!
-     * // - bot
+     * // Matches: "hey bot", "bot!", "hey bot," etc.
      * ```
      */
     regexPrefix?: RegExp;
 
     /**
-     * The prefix hook, by default it is a callback function that returns {@link PeridotClientOptions.defaultPrefix}.
-     * @since 1.0.0
+     * Function to dynamically determine command prefix.
+     * @since 0.2.6
      * @default () => client.options.defaultPrefix
+     * @see {@link PeridotPrefixHook}
      */
     fetchPrefix?: PeridotPrefixHook;
 
     /**
-     * The client's ID, this is automatically set by the CoreReady event.
-     * @since 1.0.0
+     * The client's unique identifier.
+     * @since 0.2.6
      * @default this.client.user?.id ?? null
      */
     id?: Snowflake;
 
     /**
-     * The logger options, defaults to an instance of {@link Logger} when {@link ClientLoggerOptions.instance} is not specified.
-     * @since 1.0.0
+     * Logger instance for framework and plugin logging.
+     * @since 0.2.6
+     * @requires pino
      */
     logger: Logger;
 
     /**
-     * i18n instance to be used by the framework and plugins.
-     * If not provided, features that require i18n will throw an error.
+     * Internationalization instance for translations.
+     * @since 0.2.6
+     * @requires i18next
      */
     i18n: i18n | undefined;
 
     /**
-     * Controls whether the bot will automatically appear to be typing when a text command is accepted.
+     * Whether to show typing indicator during command processing.
+     * @since 0.2.6
      * @default false
      */
     typing?: boolean;
 
     /**
-     * Controls whether the bot has mention as a prefix disabled
+     * Whether to disable using mentions as command prefixes.
+     * @since 0.2.6
      * @default false
      */
     disableMentionPrefix?: boolean;
 
+    /**
+     * Permission configuration for command access control.
+     * @since 0.2.6
+     * @see {@link PermissionLevelConfig}
+     */
     permissionConfig: PermissionLevelConfig;
 }
 
 /**
- * The base {@link Client} extension that makes Peridot work. When building a Discord bot with the framework, the developer
- * must either use this class, or extend it.
- *
- * Peridot also automatically detects the folders to scan for pieces, please read {@link StoreRegistry.registerPath}
- * for reference. This method is called at the start of the {@link PeridotClient.login} method.
- *
- * @see {@link PeridotClientOptions} for all options available to the Peridot Client. You can also provide all of discord.js' [ClientOptions](https://discord.js.org/docs/packages/discord.js/main/ClientOptions:Interface)
- *
- * @since 1.0.0
+ * The core client class for Peridot bots.
+ * Extends Discord.js Client with Peridot-specific functionality.
+ * @since 0.2.6
+ * @category Client
+ * @template Ready - Whether the client is ready
  * @example
  * ```typescript
  * const client = new PeridotClient({
- *   presence: {
- *     activity: {
- *       name: 'for commands!',
- *       type: 'LISTENING'
- *     }
- *   }
+ *     intents: [
+ *         GatewayIntentBits.Guilds,
+ *         GatewayIntentBits.GuildMembers,
+ *         GatewayIntentBits.GuildMessages,
+ *         GatewayIntentBits.DirectMessages,
+ *         GatewayIntentBits.GuildVoiceStates,
+ *         GatewayIntentBits.MessageContent,
+ *         GatewayIntentBits.GuildMessageReactions,
+ *     ],
+ *     presence: {
+ *         activities: [
+ *             {
+ *                 name: 'with cool stuff',
+ *                 type: ActivityType.Playing,
+ *             },
+ *         ],
+ *     },
+ *     partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.GuildMember],
+ *     logger: pino(),
+ *     permissionConfig: {
+ *         global: {
+ *             'ID': PermissionLevel.OWNER,
+ *         },
+ *         guilds: {},
+ *     },
+ *     defaultPrefix: '+',
  * });
  *
- * client.login(process.env.DISCORD_TOKEN)
- *   .catch(console.error);
+ * await client.login('token');
  * ```
  */
 export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready> {
     /**
-     * The client's ID, used for the user prefix.
-     * @since 1.0.0
+     * The client's unique identifier.
+     * Set automatically when the client becomes ready.
+     * @since 0.2.6
      */
     public override id: Snowflake | null = null;
 
     /**
-     * The method to be overridden by the developer.
-     * @since 1.0.0
-     * @return A string for a single prefix, an array of strings for matching multiple, or null for no match (mention prefix only).
+     * Function to determine command prefix for a message.
+     * Can be overridden for custom prefix logic.
+     * @since 0.2.6
+     * @see {@link PeridotPrefixHook}
      * @example
      * ```typescript
-     * // Return always the same prefix (unconfigurable):
-     * client.fetchPrefix = () => '!';
-     * ```
-     * @example
-     * ```typescript
-     * // Retrieving the prefix from a SQL database:
+     * // Database-based prefixes
      * client.fetchPrefix = async (message) => {
-     *   // note: driver is something generic and depends on how you connect to your database
-     *   const guild = await driver.getOne('SELECT prefix FROM public.guild WHERE id = $1', [message.guild.id]);
-     *   return guild?.prefix ?? '!';
-     * };
-     * ```
-     * @example
-     * ```typescript
-     * // Retrieving the prefix from an ORM:
-     * client.fetchPrefix = async (message) => {
-     *   // note: driver is something generic and depends on how you connect to your database
-     *   const guild = await driver.getRepository(GuildEntity).findOne({ id: message.guild.id });
-     *   return guild?.prefix ?? '!';
+     *   const prefix = await db.getGuildPrefix(message.guild.id);
+     *   return prefix ?? '!';
      * };
      * ```
      */
     public override fetchPrefix: PeridotPrefixHook;
 
     /**
-     * The logger to be used by the framework and plugins. By default, a {@link Logger} instance is used, which emits the
-     * messages to the console.
-     * @since 1.0.0
+     * Logger instance for framework and plugin logging.
+     * @since 0.2.6
      */
     public override logger: Logger;
 
     /**
-     * Whether the bot has mention as a prefix disabled
+     * Whether mention prefixes are disabled.
+     * @since 0.2.6
      * @default false
-     * @example
-     * ```typescript
-     * client.disableMentionPrefix = false;
-     * ```
      */
     public disableMentionPrefix?: boolean;
 
+    /**
+     * Creates a new Peridot client instance.
+     * @since 0.2.6
+     * @param options - Client configuration options
+     */
     public constructor(options: ClientOptions) {
         super(options);
 
         container.client = this;
 
+        // Run pre-initialization plugins
         for (const plugin of PeridotClient.plugins.values(PluginHook.PreGenericsInitialization)) {
             plugin.hook.call(this, options);
             this.emit(Events.PluginLoaded, plugin.type, plugin.name);
         }
 
+        // Initialize core components
         this.logger = options.logger;
         container.logger = options.logger;
         container.permissionConfig = options.permissionConfig;
@@ -187,6 +239,7 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
         this.fetchPrefix = options.fetchPrefix ?? (() => this.options.defaultPrefix ?? null);
         this.disableMentionPrefix = options.disableMentionPrefix;
 
+        // Run initialization plugins
         for (const plugin of PeridotClient.plugins.values(PluginHook.PreInitialization)) {
             plugin.hook.call(this, options);
             this.emit(Events.PluginLoaded, plugin.type, plugin.name);
@@ -194,17 +247,27 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
 
         this.id = options.id ?? null;
 
+        // Set client ID when ready
         this.once(Events.ClientReady, () => {
             this.id = this.user?.id ?? null;
         });
 
+        // Run post-initialization plugins
         for (const plugin of PeridotClient.plugins.values(PluginHook.PostInitialization)) {
             plugin.hook.call(this, options);
             this.emit(Events.PluginLoaded, plugin.type, plugin.name);
         }
     }
 
+    /**
+     * Logs in to Discord and initializes the client.
+     * Runs plugins at various stages of the login process.
+     * @since 0.2.6
+     * @param token - Discord bot token
+     * @returns Promise that resolves when logged in
+     */
     public override async login(token?: string) {
+        // Run pre-login plugins
         for (const plugin of PeridotClient.plugins.values(PluginHook.PreLogin)) {
             await plugin.hook.call(this, this.options);
             this.emit(Events.PluginLoaded, plugin.type, plugin.name);
@@ -212,6 +275,7 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
 
         const login = await super.login(token);
 
+        // Run post-login plugins
         for (const plugin of PeridotClient.plugins.values(PluginHook.PostLogin)) {
             await plugin.hook.call(this, this.options);
             this.emit(Events.PluginLoaded, plugin.type, plugin.name);
@@ -220,8 +284,18 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
         return login;
     }
 
+    /**
+     * Plugin manager for the client.
+     * @since 0.2.6
+     */
     public static plugins = new PluginManager();
 
+    /**
+     * Registers a plugin with the client.
+     * @since 0.2.6
+     * @param plugin - Plugin class to register
+     * @returns The client class for chaining
+     */
     public static use(plugin: typeof Plugin) {
         this.plugins.use(plugin);
         return this;

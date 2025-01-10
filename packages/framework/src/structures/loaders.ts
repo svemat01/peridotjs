@@ -1,3 +1,17 @@
+/**
+ * Provides functionality for loading and managing handlers in the PeridotJS framework.
+ * This module is responsible for:
+ * - Loading handler files from directories
+ * - Managing handler registries for different types of handlers (commands, events, etc.)
+ * - Providing type-safe handler creation and registration
+ * 
+ * The core concept is the HandlerRegistryManager which is accessible through the container
+ * and manages all the different types of handlers in your bot.
+ * 
+ * @module structures/loaders
+ * @since 0.2.6
+ */
+
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -17,19 +31,33 @@ import {
 import { container } from './container.js';
 
 /**
- * A predicate to check if the structure is valid
+ * A predicate function used to validate loaded structures.
+ * Used internally by the framework to ensure loaded files export valid handlers.
+ * 
+ * @since 0.2.6
+ * @category Types
+ * @typeParam T - The type of structure to validate
  */
 export type StructurePredicate<T> = (structure: unknown) => structure is T;
 
 /**
  * Loads all the structures in the provided directory matching the predicate.
+ * This is the core function used by the framework to load handlers from files.
  *
  * **Ignores non .ts files, index.ts files, and files ending with .lib.ts.**
  *
+ * @since 0.2.6
+ * @category Functions
  * @param dir - The directory to load the structures from
  * @param predicate - The predicate to check if the structure is valid
  * @param recursive - Whether to recursively load the structures in the directory
- * @returns
+ * @returns An array of loaded structures
+ * @throws {Error} If the provided path is not a directory
+ * @example
+ * ```ts
+ * // Load all handler exports from a directory
+ * const handlers = await loadStructures('./handlers', isHandlerExport);
+ * ```
  */
 export async function loadStructures<T>(dir: string, predicate: StructurePredicate<T>, recursive = true): Promise<T[]> {
     const { logger } = container;
@@ -78,13 +106,43 @@ export async function loadStructures<T>(dir: string, predicate: StructurePredica
     return structures;
 }
 
+/**
+ * Symbol used to mark handler exports. Used internally by the framework.
+ * Instead of using this directly, use the {@link createHandlerExport} function.
+ * 
+ * @since 0.2.6
+ * @category Symbols
+ * @internal
+ */
 export const HandlerExportSymbol = Symbol('HandlerExport');
 
 /**
- * Helper function to create a handler export object.
+ * Helper function to create a type-safe handler export object.
+ * This is the recommended way to export handlers from a file.
  *
- * @param handlerExport - The handler export object to create.
- * @returns The created handler export object.
+ * @since 0.2.6
+ * @category Functions
+ * @param handlerExport - The handler export object to create
+ * @returns The created handler export object
+ * @example
+ * ```ts
+ * import { createHandlerExport, type SlashCommand } from '@peridotjs/framework';
+ * 
+ * const pingCommand = {
+ *     data: {
+ *         name: 'ping',
+ *         description: 'Replies with pong!',
+ *     },
+ *     guilds: ["MY_GUILD_ID"],
+ *     async run(interaction) {
+ *         await interaction.reply('Pong!');
+ *     },
+ * } satisfies SlashCommand;
+ * 
+ * export default createHandlerExport({
+ *     slashCommands: [pingCommand],
+ * });
+ * ```
  */
 export const createHandlerExport = (handlerExport: Omit<HandlerExport, typeof HandlerExportSymbol>): HandlerExport => {
     return {
@@ -102,12 +160,40 @@ export const createHandlerExport = (handlerExport: Omit<HandlerExport, typeof Ha
 export const isHandlerExport = (handlerExport: unknown): handlerExport is HandlerExport =>
     typeof handlerExport === 'object' && handlerExport !== null && (handlerExport as HandlerExport)[HandlerExportSymbol] === true;
 
+/**
+ * Interface defining the basic structure of a handler registry.
+ * All handler registries must implement this interface to be compatible with the framework.
+ * 
+ * @since 0.2.6
+ * @category Interfaces
+ * @typeParam T - The type of handler this registry manages
+ */
 export interface HandlerRegistry<T> {
+    /** The name of this registry in the {@link HandlerRegistries} */
     name: keyof HandlerRegistries;
+    /** Register a handler in this registry */
     _register(handler: T): Awaitable<this>;
+    /** Unregister a handler from this registry */
     _unregister(handler: T): Awaitable<this>;
+    /** Unregister all handlers from this registry */
     _unregisterAll(): Awaitable<this>;
 }
+
+/**
+ * Type representing a handler export object.
+ * This is what your handler files should export as their default export.
+ * Use {@link createHandlerExport} to create this type safely.
+ * 
+ * @since 0.2.6
+ * @category Types
+ * @example
+ * ```ts
+ * export default createHandlerExport({
+ *   slashCommands: [myCommand],
+ *   buttonComponents: [myButton]
+ * });
+ * ```
+ */
 export type HandlerExport = {
     [key in keyof HandlerRegistries]?: HandlerRegistries[key] extends HandlerRegistry<infer T> ? T[] : never;
 } & {
@@ -116,8 +202,16 @@ export type HandlerExport = {
 
 /**
  * Type-safe handler creation helper.
- *
  * Avoids the need to cast the handler to the correct type manually.
+ * 
+ * @since 0.2.6
+ * @category Functions
+ * @typeParam _Kind - The registry kind (with or without 's' suffix)
+ * @typeParam Kind - The normalized registry kind (without 's' suffix)
+ * @typeParam T - The type of handler being created
+ * @param _kind - The kind of handler to create
+ * @param handler - The handler to create
+ * @returns The created handler with proper type inference
  */
 export const createHandler = <
     _Kind extends keyof HandlerRegistries,
@@ -131,12 +225,23 @@ export const createHandler = <
 };
 
 // #region Registries
+/**
+ * Registry for text-based commands.
+ * Handles registration and lookup of commands that are triggered by text messages.
+ * 
+ * @since 0.2.6
+ * @category Classes
+ */
 export class TextCommandRegistry implements HandlerRegistry<TextCommand> {
     public readonly name = 'textCommands';
 
     private handlers = new Map<string, TextCommand>();
     private aliases = new Map<string, string>();
 
+    /**
+     * Register a text command in this registry
+     * @param handler - The command to register
+     */
     public _register(handler: TextCommand): this {
         this.handlers.set(handler.data.name, handler);
         for (const alias of handler.data.aliases ?? []) {
@@ -145,6 +250,10 @@ export class TextCommandRegistry implements HandlerRegistry<TextCommand> {
         return this;
     }
 
+    /**
+     * Unregister a text command from this registry
+     * @param handler - The command to unregister
+     */
     public _unregister(handler: TextCommand): this {
         this.handlers.delete(handler.data.name);
         for (const alias of handler.data.aliases ?? []) {
@@ -153,16 +262,28 @@ export class TextCommandRegistry implements HandlerRegistry<TextCommand> {
         return this;
     }
 
+    /**
+     * Unregister all text commands from this registry
+     */
     public _unregisterAll(): this {
         this.handlers.clear();
         this.aliases.clear();
         return this;
     }
 
+    /**
+     * Get all registered text commands
+     * @returns Array of all registered text commands
+     */
     public getHandlers(): TextCommand[] {
         return [...this.handlers.values()];
     }
 
+    /**
+     * Get a text command by name or alias
+     * @param name - The name or alias of the command to get
+     * @returns Result containing either the command or an error
+     */
     public getHandler(name: string): Result<TextCommand, Error> {
         let handler = this.handlers.get(name);
 
@@ -181,6 +302,13 @@ export class TextCommandRegistry implements HandlerRegistry<TextCommand> {
     }
 }
 
+/**
+ * Registry for slash commands.
+ * Handles registration and lookup of Discord application commands.
+ * 
+ * @since 0.2.6
+ * @category Classes
+ */
 export class SlashCommandRegistry implements HandlerRegistry<SlashCommand> {
     public readonly name = 'slashCommands';
 
@@ -453,6 +581,13 @@ export class ClientEventRegistry implements HandlerRegistry<ClientEvent<any>> {
     }
 }
 
+/**
+ * Interface defining all available handler registries.
+ * Used for type safety when accessing registries through the container.
+ * 
+ * @since 0.2.6
+ * @category Interfaces
+ */
 export interface HandlerRegistries {
     textCommands: TextCommandRegistry;
     slashCommands: SlashCommandRegistry;
@@ -462,12 +597,26 @@ export interface HandlerRegistries {
     selectMenuComponents: SelectMenuComponentRegistry;
     clientEvents: ClientEventRegistry;
 }
-// #endregion Registries
 
 /**
  * Represents a registry manager for handlers.
  * This framework provides handler registries for text commands, slash commands, context menu commands, buttons, modals, select menus, and client events.
  * Plugins can also create their own registries for custom handlers implementing the {@link HandlerRegistry} interface.
+ * 
+ * The registry manager is accessible through the container object: `container.handlers`
+ *
+ * @since 0.2.6
+ * @category Classes
+ * @example
+ * ```ts
+ * // Load handlers from a directory
+ * await container.handlers.loadHandlerExports(
+ *   new URL('handlers/', import.meta.url).pathname
+ * );
+ * 
+ * // Get a specific registry
+ * const slashCommands = container.handlers.getRegistry('slashCommands');
+ * ```
  */
 export class HandlerRegistryManager {
     // We can't hardcode the different registries because additional ones can be added by plugins
@@ -520,6 +669,22 @@ export class HandlerRegistryManager {
         return this.registries as unknown as HandlerRegistries;
     }
 
+    /**
+     * Loads handler exports from a directory.
+     * This is the recommended way to load handlers into your bot.
+     * 
+     * @since 0.2.6
+     * @param dir - The directory to load handler exports from
+     * @param recursive - Whether to recursively load handler exports from subdirectories
+     * @param overwrite - Whether to unregister existing handlers before loading new ones
+     * @example
+     * ```ts
+     * // Load all handlers from the handlers directory
+     * await container.handlers.loadHandlerExports(
+     *   new URL('handlers/', import.meta.url).pathname
+     * );
+     * ```
+     */
     public async loadHandlerExports(dir: string, recursive = true, overwrite = true) {
         const { logger } = container;
 
@@ -543,7 +708,8 @@ export class HandlerRegistryManager {
 
 /**
  * Used to register the built-in handler registries.
- * @private This is an internal function and should not be used.
+ * @internal This is an internal function and should not be used directly.
+ * @since 0.2.6
  */
 export const registerBuiltInHandlerRegistries = (manager: HandlerRegistryManager) => {
     manager.registerRegistry(new TextCommandRegistry());

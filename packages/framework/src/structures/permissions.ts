@@ -1,66 +1,81 @@
+/**
+ * Provides the permission system for the PeridotJS framework.
+ * This module implements a hierarchical permission system that can be used to control
+ * access to commands and features both globally and per-guild.
+ * 
+ * The permission system provides:
+ * - Hierarchical permission levels (OWNER, ADMINISTRATOR, MODERATOR, REGULAR, BLOCKED)
+ * - Global and per-guild permission configuration
+ * - Permission level checking and comparison
+ * 
+ * @module structures/permissions
+ * @since 0.2.6
+ */
+
 import type { GuildMember, Snowflake } from 'discord.js';
 
 /**
- * Represents the permission levels for a user.
+ * Enumeration of available permission levels.
+ * Permission levels are hierarchical, with higher levels having more access.
+ * 
+ * @since 0.2.6
+ * @category Enums
+ * @example
+ * ```typescript
+ * // Check if a user has moderator permissions
+ * if (userLevel >= PermissionLevel.MODERATOR) {
+ *   // User can access moderator features
+ * }
+ * ```
  */
 export enum PermissionLevel {
-    /**
-     * The owner permission level.
-     */
-    OWNER = 4,
-
-    /**
-     * The administrator permission level.
-     */
-    ADMINISTRATOR = 3,
-
-    /**
-     * The moderator permission level.
-     */
-    MODERATOR = 2,
-
-    /**
-     * The regular user permission level.
-     */
-    REGULAR = 1,
-
-    /**
-     * The blocked user permission level.
-     */
-    BLOCKED = 0,
+    /** Blocked users cannot use any commands */
+    BLOCKED = -1,
+    /** Regular users have access to basic commands */
+    REGULAR = 0,
+    /** Moderators have access to moderation commands */
+    MODERATOR = 1,
+    /** Administrators have access to administrative commands */
+    ADMINISTRATOR = 2,
+    /** Owners have access to all commands */
+    OWNER = 3,
 }
 
 /**
- * Represents the configuration for permission levels.
- *
+ * Type representing a mapping of user IDs to permission levels.
+ * Used to configure permissions for specific users.
+ * 
+ * @since 0.2.6
+ * @category Types
+ */
+export type PermissionLevelMapping = Record<Snowflake, PermissionLevel>;
+
+/**
+ * Interface for configuring permission levels globally and per-guild.
+ * 
+ * @since 0.2.6
+ * @category Interfaces
  * @example
  * ```typescript
- * {
+ * const config: PermissionLevelConfig = {
  *   global: {
- *     'USER_ID_1': PermissionLevel.ADMINISTRATOR, // Has administrator permissions globally
+ *     'OWNER_ID': PermissionLevel.OWNER,
+ *     'ADMIN_ID': PermissionLevel.ADMINISTRATOR
  *   },
  *   guilds: {
- *     'GUILD_ID_1': {
- *         'USER_ID_2': PermissionLevel.ADMINISTRATOR, // Has administrator permissions in GUILD_ID_1
- *     },
- *  },
+ *     'GUILD_ID': {
+ *       'MOD_ID': PermissionLevel.MODERATOR
+ *     }
+ *   }
+ * };
  * ```
  */
 export type PermissionLevelConfig = {
-    /**
-     * The global permission level for each user.
-     *
-     * User ID -> Permission Level
-     */
-    global: Record<Snowflake, PermissionLevel>;
-
-    /**
-     * The permission level map for each guild.
-     *
-     * Guild ID -> Role ID -> Permission Level
-     */
-    guilds: Record<Snowflake, Record<Snowflake, PermissionLevel>>;
-};
+    /** Global permission level mappings */
+    global: PermissionLevelMapping;
+    /** Per-guild role permission level mappings */
+    guilds?: Record<Snowflake, PermissionLevelMapping>;
+}
 
 /**
  * Retrieves the permission level for a given member based on the provided configuration.
@@ -77,7 +92,7 @@ export const getPermissionLevel = (member: GuildMember | null, config: Permissio
         return config.global[member.id]!;
     }
 
-    const guildConfig = config.guilds[member.guild.id];
+    const guildConfig = config.guilds?.[member.guild.id];
 
     if (!guildConfig) return defaultRole;
 
