@@ -1,9 +1,10 @@
-import type { Awaitable, ClientOptions, Message, Snowflake } from 'discord.js';
+import type { Awaitable, ClientOptions, Snowflake } from 'discord.js';
 import { Client } from 'discord.js';
 import type { i18n } from 'i18next';
 import type { Logger } from 'pino';
 
 import { Events } from '../events/index.js';
+import type { TextCommandMessage } from '../handlers/TextCommand.js';
 import { container } from './container.js';
 import { HandlerRegistryManager, registerBuiltInHandlerRegistries } from './loaders.js';
 import type { PermissionLevelConfig } from './permissions.js';
@@ -18,7 +19,7 @@ import { Plugin, PluginHook, PluginManager } from './plugins.js';
 export type PeridotPrefix = string | readonly string[] | null;
 
 export type PeridotPrefixHook = {
-    (message: Message): Awaitable<PeridotPrefix>;
+    (message: TextCommandMessage): Awaitable<PeridotPrefix>;
 };
 
 export interface PeridotClientOptions {
@@ -86,7 +87,7 @@ export interface PeridotClientOptions {
     disableMentionPrefix?: boolean;
 
     permissionConfig: PermissionLevelConfig;
-};
+}
 
 /**
  * The base {@link Client} extension that makes Peridot work. When building a Discord bot with the framework, the developer
@@ -221,10 +222,10 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
 
     public static plugins = new PluginManager();
 
-	public static use(plugin: typeof Plugin) {
-		this.plugins.use(plugin);
-		return this;
-	}
+    public static use(plugin: typeof Plugin) {
+        this.plugins.use(plugin);
+        return this;
+    }
 }
 
 declare module 'discord.js' {

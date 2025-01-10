@@ -1,13 +1,13 @@
 import { isDMChannel, isGroupChannel } from '@sapphire/discord.js-utilities';
-import type { Message } from 'discord.js';
 import { PermissionFlagsBits, PermissionsBitField } from 'discord.js';
 
+import type { TextCommandMessage } from '../../handlers/TextCommand.js';
 import { container } from '../../structures/container.js';
 import { Events } from '../index.js';
 
 const requiredPermissions = new PermissionsBitField([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]).freeze();
 
-export async function onMessageCreate(message: Message): Promise<void> {
+export async function onMessageCreate(message: TextCommandMessage): Promise<void> {
     const { client, logger } = container;
 
     const canRun = await canRunInChannel(message);
@@ -37,7 +37,7 @@ export async function onMessageCreate(message: Message): Promise<void> {
     else client.emit(Events.PrefixedMessage, message, prefix);
 }
 
-async function canRunInChannel(message: Message): Promise<boolean> {
+async function canRunInChannel(message: TextCommandMessage): Promise<boolean> {
     if (isDMChannel(message.channel) || isGroupChannel(message.channel)) return true;
 
     const me = await message.guild?.members.fetchMe();
@@ -50,7 +50,7 @@ async function canRunInChannel(message: Message): Promise<boolean> {
     return permissionsFor.has(requiredPermissions, true);
 }
 
-function getMentionPrefix(message: Message): string | null {
+function getMentionPrefix(message: TextCommandMessage): string | null {
     // If the content is shorter than 20 characters, or does not start with `<@` then skip early:
     if (message.content.length < 20 || !message.content.startsWith('<@')) return null;
 

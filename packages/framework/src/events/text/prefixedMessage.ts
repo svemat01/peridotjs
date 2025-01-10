@@ -1,14 +1,9 @@
-import type { Message } from 'discord.js';
-
+import type { TextCommandMessage } from '../../handlers/TextCommand.js';
 import { container } from '../../structures/container.js';
 import { Events } from '../index.js';
 
-export function onPrefixedMessage(message: Message, prefix: string | RegExp) {
-    const {
-        client,
-        handlers,
-        logger,
-    } = container;
+export function onPrefixedMessage(message: TextCommandMessage, prefix: string | RegExp) {
+    const { client, handlers, logger } = container;
     container.logger.trace({ src: message.id, prefix }, 'Prefixed received');
     // Retrieve the command name and validate:
     const commandPrefix = getCommandPrefix(message.content, prefix);

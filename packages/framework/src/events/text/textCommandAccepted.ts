@@ -2,10 +2,10 @@ import type { IUnorderedStrategy } from '@sapphire/lexure';
 import { ArgumentStream, Lexer, Parser } from '@sapphire/lexure';
 import { Result } from '@sapphire/result';
 import { Stopwatch } from '@sapphire/stopwatch';
-import type { Message } from 'discord.js';
 
 import { FlagUnorderedStrategy } from '../../arguments/FlagStrategy.js';
 import { Args } from '../../arguments/Parser.js';
+import type { TextCommandMessage } from '../../handlers/TextCommand.js';
 import type { TextCommandAcceptedPayload } from '../index.js';
 import { Events } from '../index.js';
 
@@ -64,7 +64,7 @@ const lexer = new Lexer({
     ],
 });
 
-function messagePreParse(message: Message, parameters: string, strategy?: IUnorderedStrategy) {
+function messagePreParse(message: TextCommandMessage, parameters: string, strategy?: IUnorderedStrategy) {
     const parser = new Parser(strategy);
     const args = new ArgumentStream(parser.run(lexer.run(parameters)));
     return new Args(message, args);

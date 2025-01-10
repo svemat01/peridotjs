@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import {
     type AnySelectMenuInteraction,
     AutocompleteInteraction,
@@ -7,13 +8,13 @@ import {
     ContextMenuCommandInteraction,
     EmbedBuilder,
     Events as DJSEvents,
-    type Message,
     ModalSubmitInteraction,
     type SelectMenuType,
 } from 'discord.js';
 import type { Logger } from 'pino';
 
 import { UserError } from '../errors/UserError.js';
+import type { TextCommandMessage } from '../handlers/TextCommand.js';
 import type {
     ButtonComponent as PeridotButtonComponent,
     ContextMenuCommand,
@@ -130,22 +131,22 @@ export const Events = {
     // #region Text commands chain
     /**
      * Emitted when a message is created that was not sent by bots or webhooks.
-     * @param {Message} message The created message
+     * @param {TextCommandMessage} message The created message
      */
     PreMessageParsed: 'preMessageParsed' as const,
     /**
      * Emitted when a message is created consisting of only the bot's mention.
-     * @param {Message} message The created message
+     * @param {TextCommandMessage} message The created message
      */
     MentionPrefixOnly: 'mentionPrefixOnly' as const,
     /**
      * Emitted when a message is created that does not start with a valid prefix.
-     * @param {Message} message The created message
+     * @param {TextCommandMessage} message The created message
      */
     NonPrefixedMessage: 'nonPrefixedMessage' as const,
     /**
      * Emitted when a message is created that does starts with a valid prefix.
-     * @param {Message} message The created message
+     * @param {TextCommandMessage} message The created message
      */
     PrefixedMessage: 'prefixedMessage' as const,
 
@@ -180,7 +181,7 @@ export const Events = {
 
     /**
      * Emitted directly before a text command is run.
-     * @param {Message} message The message that executed the command
+     * @param {TextCommandMessage} message The message that executed the command
      * @param {Command} command The command that is being run
      * @param {TextCommandRunPayload} payload The contextual payload
      */
@@ -198,7 +199,7 @@ export const Events = {
     TextCommandError: 'textCommandError' as const,
     /**
      * Emitted directly after a text command finished running, regardless of the outcome.
-     * @param {Message} message The message that executed the command
+     * @param {TextCommandMessage} message The message that executed the command
      * @param {Command} command The command that finished running
      * @param {TextCommandFinishPayload} payload The contextual payload
      */
@@ -511,7 +512,7 @@ export const Events = {
 
 // #region Text command payloads
 export interface UnknownTextCommandNamePayload {
-    message: Message;
+    message: TextCommandMessage;
     prefix: string | RegExp;
     commandPrefix: string;
 }
@@ -521,7 +522,7 @@ export interface UnknownTextCommandPayload extends UnknownTextCommandNamePayload
 }
 
 export interface ITextCommandPayload {
-    message: Message;
+    message: TextCommandMessage;
     command: TextCommand;
     logger: Logger;
 }
@@ -747,21 +748,21 @@ declare const PeridotEvents: typeof Events;
 
 declare module 'discord.js' {
     interface ClientEvents {
-        [PeridotEvents.PreMessageParsed]: [message: Message];
-        [PeridotEvents.MentionPrefixOnly]: [message: Message];
-        [PeridotEvents.NonPrefixedMessage]: [message: Message];
-        [PeridotEvents.PrefixedMessage]: [message: Message, prefix: string | RegExp];
+        [PeridotEvents.PreMessageParsed]: [message: TextCommandMessage];
+        [PeridotEvents.MentionPrefixOnly]: [message: TextCommandMessage];
+        [PeridotEvents.NonPrefixedMessage]: [message: TextCommandMessage];
+        [PeridotEvents.PrefixedMessage]: [message: TextCommandMessage, prefix: string | RegExp];
 
         [PeridotEvents.UnknownTextCommandName]: [payload: UnknownTextCommandNamePayload];
         [PeridotEvents.UnknownTextCommand]: [payload: UnknownTextCommandPayload];
         [PeridotEvents.PreTextCommandRun]: [payload: PreTextCommandRunPayload];
         [PeridotEvents.TextCommandDenied]: [error: UserError, payload: TextCommandDeniedPayload];
         [PeridotEvents.TextCommandAccepted]: [payload: TextCommandAcceptedPayload];
-        [PeridotEvents.TextCommandRun]: [message: Message, command: TextCommand, payload: TextCommandRunPayload];
+        [PeridotEvents.TextCommandRun]: [message: TextCommandMessage, command: TextCommand, payload: TextCommandRunPayload];
         [PeridotEvents.TextCommandSuccess]: [payload: TextCommandSuccessPayload];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         [PeridotEvents.TextCommandError]: [error: any, payload: TextCommandErrorPayload];
-        [PeridotEvents.TextCommandFinish]: [message: Message, command: TextCommand, payload: TextCommandFinishPayload];
+        [PeridotEvents.TextCommandFinish]: [message: TextCommandMessage, command: TextCommand, payload: TextCommandFinishPayload];
 
         [PeridotEvents.PossibleAutocompleteInteraction]: [interaction: AutocompleteInteraction];
         [PeridotEvents.AutocompleteInteractionError]: [error: unknown, payload: AutocompleteInteractionErrorPayload];

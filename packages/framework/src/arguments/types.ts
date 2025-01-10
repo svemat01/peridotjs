@@ -34,7 +34,6 @@ export type IArgument<T> = {
     run(parameter: string, context: ArgumentContext<T>): AwaitableArgumentResult<T>;
 };
 
-
 export type ArgumentOptions = {
     name: string;
 };
