@@ -1,5 +1,11 @@
 # @peridotjs/framework
 
+## 0.2.7
+
+### Patch Changes
+
+-   f5397cc: Remove PartialGroupDMChannel from text command types to eliminate redundant type narrowing in command handlers.
+
 ## 0.2.6
 
 ### Patch Changes
