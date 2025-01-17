@@ -6,7 +6,8 @@
   "devDependencies": {
     "@sapphire/prettier-config": "^2.0.0",
     "@sapphire/ts-config": "^5.0.1",
-    "eslint": "^9.17.0"
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2"
   },
   "keywords": [],
   "license": "ISC",
