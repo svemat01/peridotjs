@@ -132,6 +132,13 @@ export type TextCommand = {
      * @see {@link TextCommandRun}
      */
     run: TextCommandRun;
+
+    /**
+     * A function to handle errors that occur during the command execution.
+     * @param error The error that occurred
+     * @param ctx The command context
+     */
+    onError?: (error: unknown, ctx: TextCommandContext) => Promise<void> | void;
 };
 
 /**
@@ -369,6 +376,13 @@ export type GroupTextCommand<TData extends TextCommandData = TextCommandData, TS
      * The subcommands this command contains.
      */
     subcommands: TSubCommand[];
+
+    /**
+     * A function to handle errors that occur during the command execution.
+     * @param error The error that occurred
+     * @param ctx The command context
+     */
+    onError?: (error: unknown, ctx: TextCommandContext) => Promise<void> | void;
 };
 
 const generateHelp = (rootCommand: GroupTextCommand, subcommandPath: string[] = []): string[] => {
@@ -651,6 +665,7 @@ export const createTextCommand = <T extends TextCommand | GroupTextCommand>(comm
                 });
             }
         },
+        onError: command.onError,
     };
 };
 

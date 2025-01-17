@@ -39,13 +39,29 @@ export async function onTextCommandAccepted(payload: TextCommandAcceptedPayload)
         return duration;
     });
 
-    result.inspectErr((error) =>
+    // Handle errors with command.onError if it exists, otherwise emit error event
+    result.inspectErr(async (error) => {
+        if (command.onError) {
+            try {
+                await command.onError(error, { args, logger });
+            } catch (handlerError) {
+                // If the error handler throws, emit that as the error instead
+                message.client.emit(Events.TextCommandError, handlerError, {
+                    ...payload,
+                    args,
+                    duration: -1,
+                });
+            }
+            return;
+        }
+
+        // No custom error handler, emit the standard error event
         message.client.emit(Events.TextCommandError, error, {
             ...payload,
             args,
             duration: -1,
-        }),
-    );
+        });
+    });
 
     message.client.emit(Events.TextCommandFinish, message, command, {
         ...payload,
