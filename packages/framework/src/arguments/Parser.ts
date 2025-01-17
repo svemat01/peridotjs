@@ -612,6 +612,10 @@ export class Args {
         return this.parser.flag(...keys);
     }
 
+    public hasFlags(...keys: readonly string[]): boolean {
+        return this.parser.flag(...keys);
+    }
+
     /**
      * Gets the last value of one or more options as an {@link Option}.
      * If you do not care about safely handling non-existing values
@@ -708,11 +712,26 @@ export class Args {
     }
 
     /**
+     * Resets the parser to its initial state.
+     */
+    public reset(): void {
+        this.states.length = 0;
+        this.parser.reset();
+    }
+
+    /**
      * Restores the previously saved state from the stack.
      * @see Args#save
      */
     public restore(): void {
         if (this.states.length !== 0) this.parser.restore(this.states.pop()!);
+    }
+
+    /**
+     * Removes the latest saved state from the stack without restoring it.
+     */
+    public discard(): void {
+        this.states.pop();
     }
 
     /**
