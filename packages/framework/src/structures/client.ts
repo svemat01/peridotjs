@@ -3,10 +3,10 @@ import { Client } from 'discord.js';
 import type { i18n } from 'i18next';
 import type { Logger } from 'pino';
 
-import { Events } from '../events/index.js';
+import { _registerCoreEventHandlers, Events } from '../events/index.js';
 import type { TextCommandMessage } from '../handlers/TextCommand.js';
 import { container } from './container.js';
-import { HandlerRegistryManager, registerBuiltInHandlerRegistries } from './loaders.js';
+import { _registerBuiltInHandlerRegistries, HandlerRegistryManager } from './loaders.js';
 import type { PermissionLevelConfig } from './permissions.js';
 import { Plugin, PluginHook, PluginManager } from './plugins.js';
 
@@ -217,9 +217,14 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
      * Creates a new Peridot client instance.
      * @since 0.2.6
      * @param options - Client configuration options
+     * @throws {Error} If the client is already initialized
      */
     public constructor(options: ClientOptions) {
         super(options);
+
+        if (container.client) {
+            throw new Error('PeridotClient already initialized, only one instance is allowed');
+        }
 
         container.client = this;
 
@@ -234,7 +239,7 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
         container.logger = options.logger;
         container.permissionConfig = options.permissionConfig;
         container.handlers = new HandlerRegistryManager();
-        registerBuiltInHandlerRegistries(container.handlers);
+        _registerBuiltInHandlerRegistries(container.handlers);
 
         this.fetchPrefix = options.fetchPrefix ?? (() => this.options.defaultPrefix ?? null);
         this.disableMentionPrefix = options.disableMentionPrefix;
@@ -251,6 +256,8 @@ export class PeridotClient<Ready extends boolean = boolean> extends Client<Ready
         this.once(Events.ClientReady, () => {
             this.id = this.user?.id ?? null;
         });
+
+        _registerCoreEventHandlers(this);
 
         // Run post-initialization plugins
         for (const plugin of PeridotClient.plugins.values(PluginHook.PostInitialization)) {

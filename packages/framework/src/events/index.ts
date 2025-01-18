@@ -3,6 +3,7 @@ import {
     AutocompleteInteraction,
     ButtonInteraction,
     ChatInputCommandInteraction,
+    Client,
     Colors,
     ContextMenuCommandInteraction,
     EmbedBuilder,
@@ -868,18 +869,60 @@ declare module 'discord.js' {
     }
 }
 
-export const registerEvents = () => {
+/**
+ * Registers core event handlers for the client.
+ * @internal Called internally by the client on initialization
+ */
+export const _registerCoreEventHandlers = (client: Client) => {
+    // Text command events
+    client.on(Events.MessageCreate, onMessageCreate);
+    client.on(Events.PrefixedMessage, onPrefixedMessage);
+    client.on(Events.PreTextCommandRun, preTextCommandRun);
+    client.on(Events.TextCommandAccepted, onTextCommandAccepted);
+
+    // Interaction events
+    client.on(Events.InteractionCreate, onInteractionCreate);
+
+    // - Slash command events
+    client.on(Events.PossibleSlashCommand, onPossibleSlashCommand);
+    client.on(Events.PreSlashCommandRun, onPreSlashCommandRun);
+    client.on(Events.SlashCommandAccepted, onSlashCommandAccepted);
+
+    // - Context menu command events
+    client.on(Events.PossibleContextMenuCommand, onPossibleContextMenuCommand);
+    client.on(Events.PreContextMenuCommandRun, onPreContextMenuCommandRun);
+    client.on(Events.ContextMenuCommandAccepted, onContextMenuCommandAccepted);
+
+    // - Button component events
+    client.on(Events.PossibleButtonInteraction, onPossibleButtonInteraction);
+    client.on(Events.PreButtonInteractionRun, onPreButtonInteractionRun);
+    client.on(Events.ButtonInteractionAccepted, onButtonInteractionAccepted);
+
+    // - Select menu component events
+    client.on(Events.PossibleSelectMenuInteraction, onPossibleSelectMenuInteraction);
+    client.on(Events.PreSelectMenuInteractionRun, onPreSelectMenuInteractionRun);
+    client.on(Events.SelectMenuInteractionAccepted, onSelectMenuInteractionAccepted);
+
+    // - Modal component events
+    client.on(Events.PossibleModalSubmitInteraction, onPossibleModalSubmitInteraction);
+    client.on(Events.PreModalSubmitInteractionRun, onPreModalSubmitInteractionRun);
+    client.on(Events.ModalSubmitInteractionAccepted, onModalSubmitInteractionAccepted);
+};
+
+/**
+ * Register default event loggers for the client.
+ *
+ * Used for extra logging and debugging.
+ * @since 0.3.0
+ * @category Events
+ */
+export const registerDefaultEventLoggers = () => {
     const { client } = container;
     client.once(Events.ClientReady, () => {
         container.logger.info('Client ready');
     });
 
     // #region Text command events
-    client.on(Events.MessageCreate, onMessageCreate);
-    client.on(Events.PrefixedMessage, onPrefixedMessage);
-    client.on(Events.PreTextCommandRun, preTextCommandRun);
-    client.on(Events.TextCommandAccepted, onTextCommandAccepted);
-
     client.on(Events.TextCommandDenied, (error, { logger }) => {
         logger.debug({ err: error }, 'TextCommandDenied');
     });
@@ -913,12 +956,7 @@ export const registerEvents = () => {
     });
     // #endregion Text command events
 
-    client.on(Events.InteractionCreate, onInteractionCreate);
     // #region Slash command events
-    client.on(Events.PossibleSlashCommand, onPossibleSlashCommand);
-    client.on(Events.PreSlashCommandRun, onPreSlashCommandRun);
-    client.on(Events.SlashCommandAccepted, onSlashCommandAccepted);
-
     client.on(Events.SlashCommandDenied, (error, { logger }) => {
         logger.debug({ err: error }, 'SlashCommandDenied');
     });
@@ -951,10 +989,6 @@ export const registerEvents = () => {
     // #endregion Slash command events
 
     // #region Context menu command events
-    client.on(Events.PossibleContextMenuCommand, onPossibleContextMenuCommand);
-    client.on(Events.PreContextMenuCommandRun, onPreContextMenuCommandRun);
-    client.on(Events.ContextMenuCommandAccepted, onContextMenuCommandAccepted);
-
     client.on(Events.ContextMenuCommandDenied, (error, { logger }) => {
         logger.debug({ err: error }, 'ContextMenuCommandDenied');
     });
@@ -987,10 +1021,6 @@ export const registerEvents = () => {
     // #endregion Context menu command events
 
     // #region Button component events
-    client.on(Events.PossibleButtonInteraction, onPossibleButtonInteraction);
-    client.on(Events.PreButtonInteractionRun, onPreButtonInteractionRun);
-    client.on(Events.ButtonInteractionAccepted, onButtonInteractionAccepted);
-
     client.on(Events.ButtonInteractionDenied, (error, { logger }) => {
         logger.debug({ err: error }, 'ButtonInteractionDenied');
     });
@@ -1023,10 +1053,6 @@ export const registerEvents = () => {
     // #endregion Button component events
 
     // #region Select menu component events
-    client.on(Events.PossibleSelectMenuInteraction, onPossibleSelectMenuInteraction);
-    client.on(Events.PreSelectMenuInteractionRun, onPreSelectMenuInteractionRun);
-    client.on(Events.SelectMenuInteractionAccepted, onSelectMenuInteractionAccepted);
-
     client.on(Events.SelectMenuInteractionDenied, (error, { logger }) => {
         logger.debug({ err: error }, 'SelectMenuInteractionDenied');
     });
@@ -1059,10 +1085,6 @@ export const registerEvents = () => {
     // #endregion Select menu component events
 
     // #region Modal component events
-    client.on(Events.PossibleModalSubmitInteraction, onPossibleModalSubmitInteraction);
-    client.on(Events.PreModalSubmitInteractionRun, onPreModalSubmitInteractionRun);
-    client.on(Events.ModalSubmitInteractionAccepted, onModalSubmitInteractionAccepted);
-
     client.on(Events.ModalSubmitInteractionDenied, (error, { logger }) => {
         logger.debug({ err: error }, 'ModalSubmitInteractionDenied');
     });

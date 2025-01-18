@@ -20,7 +20,7 @@ export type TextCommandMessage<InGuild extends boolean = boolean> = OmitPartialG
  * @since 0.2.6
  * @category Commands
  */
-export type TextCommandData = {
+export interface TextCommandData {
     /**
      * The primary name of the command used to invoke it.
      * @example 'help'
@@ -54,17 +54,16 @@ export type TextCommandData = {
     /**
      * Specifies which guilds this command is available in.
      * - 'global': Available in all guilds
-     * - 'trusted': Only available in trusted guilds
      * - Snowflake[]: Only available in the specified guilds
      */
-    guilds: Snowflake[] | 'global' | 'trusted';
+    guilds: Snowflake[] | 'global';
 
     /**
      * The permission level required to use this command.
      * @see {@link PermissionLevel}
      */
     permission: PermissionLevel;
-};
+}
 
 /**
  * Context object passed to text command handlers.
@@ -72,13 +71,28 @@ export type TextCommandData = {
  * @category Commands
  * @template T - Additional context properties specific to this command
  */
-export type TextCommandContext<T extends Record<string, unknown> = Record<string, unknown>> = CommonContext & {
+export interface TextCommandContext extends CommonContext {
     /**
      * Parsed arguments from the command message.
      * @see {@link Args}
      */
     args: Args;
-} & T;
+}
+
+export interface TextCommandBase {
+    /**
+     * Configuration data for the command.
+     * @see {@link TextCommandData}
+     */
+    data: TextCommandData;
+
+    /**
+     * A function to handle errors that occur during the command execution.
+     * @param error The error that occurred
+     * @param ctx The command context
+     */
+    onError?: (error: unknown, ctx: TextCommandContext) => Promise<void> | void;
+}
 
 /**
  * Function signature for text command handlers.
@@ -120,26 +134,13 @@ export type TextCommandRun<T extends Record<string, unknown> = Record<string, un
  * ```
  * @requires Discord.js v14 or higher
  */
-export type TextCommand = {
-    /**
-     * Configuration data for the command.
-     * @see {@link TextCommandData}
-     */
-    data: TextCommandData;
-
+export interface TextCommand extends TextCommandBase {
     /**
      * The function to execute when the command is invoked.
      * @see {@link TextCommandRun}
      */
     run: TextCommandRun;
-
-    /**
-     * A function to handle errors that occur during the command execution.
-     * @param error The error that occurred
-     * @param ctx The command context
-     */
-    onError?: (error: unknown, ctx: TextCommandContext) => Promise<void> | void;
-};
+}
 
 /**
  * Represents an argument for a subcommand.
@@ -366,24 +367,13 @@ export type Subcommand = ExecutableSubcommand | GroupSubcommand;
  * };
  * ```
  */
-export type GroupTextCommand<TData extends TextCommandData = TextCommandData, TSubCommand extends Subcommand = Subcommand> = {
-    /**
-     * Configuration data for the command.
-     */
-    data: TData;
-
+export interface GroupTextCommand extends TextCommandBase {
     /**
      * The subcommands this command contains.
+     * @see {@link Subcommand}
      */
-    subcommands: TSubCommand[];
-
-    /**
-     * A function to handle errors that occur during the command execution.
-     * @param error The error that occurred
-     * @param ctx The command context
-     */
-    onError?: (error: unknown, ctx: TextCommandContext) => Promise<void> | void;
-};
+    subcommands: Subcommand[];
+}
 
 const generateHelp = (rootCommand: GroupTextCommand, subcommandPath: string[] = []): string[] => {
     const command = findSubcommandByPath(rootCommand, subcommandPath);
@@ -540,20 +530,23 @@ export const createTextCommand = <T extends TextCommand | GroupTextCommand>(comm
         return command;
     }
 
+    const { data: commandData, subcommands, ...rest } = command;
+
     return {
+        ...rest,
         data: {
-            ...command.data,
+            ...commandData,
             strategy: {
-                ...command.data.strategy,
                 flags: true,
                 options: true,
+                ...commandData.strategy,
             },
         },
         async run(...props) {
             const [msg, ctx] = props;
             const args = ctx.args;
 
-            let currentSubcommands = command.subcommands;
+            let currentSubcommands = subcommands;
             const subcommandPath: string[] = [];
             let currentSubcommand: Subcommand | undefined;
 
@@ -575,7 +568,7 @@ export const createTextCommand = <T extends TextCommand | GroupTextCommand>(comm
                 }
 
                 // Check permissions before accepting the subcommand
-                if (found.permission && found.permission > command.data.permission) {
+                if (found.permission && found.permission > commandData.permission) {
                     throw new UserError({
                         identifier: 'insufficient_permissions',
                         message: `You don't have permission to use the \`${found.name}\` subcommand.`,
@@ -648,7 +641,7 @@ export const createTextCommand = <T extends TextCommand | GroupTextCommand>(comm
                 if (!currentSubcommand) {
                     throw new UserError({
                         identifier: 'subcommand_required',
-                        message: `This command requires a subcommand. Use \`${command.data.name} --help\` to see available subcommands.`,
+                        message: `This command requires a subcommand. Use \`${commandData.name} --help\` to see available subcommands.`,
                     });
                 }
             }
@@ -661,11 +654,10 @@ export const createTextCommand = <T extends TextCommand | GroupTextCommand>(comm
                 const commandPath = subcommandPath.length > 0 ? ` ${subcommandPath.join(' ')}` : '';
                 throw new UserError({
                     identifier: 'invalid_subcommand',
-                    message: `Please specify a valid subcommand. Use \`${command.data.name}${commandPath} --help\` to see available subcommands.`,
+                    message: `Please specify a valid subcommand. Use \`${commandData.name}${commandPath} --help\` to see available subcommands.`,
                 });
             }
         },
-        onError: command.onError,
     };
 };
 

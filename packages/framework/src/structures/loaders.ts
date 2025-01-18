@@ -4,10 +4,10 @@
  * - Loading handler files from directories
  * - Managing handler registries for different types of handlers (commands, events, etc.)
  * - Providing type-safe handler creation and registration
- * 
+ *
  * The core concept is the HandlerRegistryManager which is accessible through the container
  * and manages all the different types of handlers in your bot.
- * 
+ *
  * @module structures/loaders
  * @since 0.2.6
  */
@@ -33,7 +33,7 @@ import { container } from './container.js';
 /**
  * A predicate function used to validate loaded structures.
  * Used internally by the framework to ensure loaded files export valid handlers.
- * 
+ *
  * @since 0.2.6
  * @category Types
  * @typeParam T - The type of structure to validate
@@ -109,7 +109,7 @@ export async function loadStructures<T>(dir: string, predicate: StructurePredica
 /**
  * Symbol used to mark handler exports. Used internally by the framework.
  * Instead of using this directly, use the {@link createHandlerExport} function.
- * 
+ *
  * @since 0.2.6
  * @category Symbols
  * @internal
@@ -127,7 +127,7 @@ export const HandlerExportSymbol = Symbol('HandlerExport');
  * @example
  * ```ts
  * import { createHandlerExport, type SlashCommand } from '@peridotjs/framework';
- * 
+ *
  * const pingCommand = {
  *     data: {
  *         name: 'ping',
@@ -138,7 +138,7 @@ export const HandlerExportSymbol = Symbol('HandlerExport');
  *         await interaction.reply('Pong!');
  *     },
  * } satisfies SlashCommand;
- * 
+ *
  * export default createHandlerExport({
  *     slashCommands: [pingCommand],
  * });
@@ -163,7 +163,7 @@ export const isHandlerExport = (handlerExport: unknown): handlerExport is Handle
 /**
  * Interface defining the basic structure of a handler registry.
  * All handler registries must implement this interface to be compatible with the framework.
- * 
+ *
  * @since 0.2.6
  * @category Interfaces
  * @typeParam T - The type of handler this registry manages
@@ -183,7 +183,7 @@ export interface HandlerRegistry<T> {
  * Type representing a handler export object.
  * This is what your handler files should export as their default export.
  * Use {@link createHandlerExport} to create this type safely.
- * 
+ *
  * @since 0.2.6
  * @category Types
  * @example
@@ -203,7 +203,7 @@ export type HandlerExport = {
 /**
  * Type-safe handler creation helper.
  * Avoids the need to cast the handler to the correct type manually.
- * 
+ *
  * @since 0.2.6
  * @category Functions
  * @typeParam _Kind - The registry kind (with or without 's' suffix)
@@ -228,7 +228,7 @@ export const createHandler = <
 /**
  * Registry for text-based commands.
  * Handles registration and lookup of commands that are triggered by text messages.
- * 
+ *
  * @since 0.2.6
  * @category Classes
  */
@@ -305,7 +305,7 @@ export class TextCommandRegistry implements HandlerRegistry<TextCommand> {
 /**
  * Registry for slash commands.
  * Handles registration and lookup of Discord application commands.
- * 
+ *
  * @since 0.2.6
  * @category Classes
  */
@@ -584,7 +584,7 @@ export class ClientEventRegistry implements HandlerRegistry<ClientEvent<any>> {
 /**
  * Interface defining all available handler registries.
  * Used for type safety when accessing registries through the container.
- * 
+ *
  * @since 0.2.6
  * @category Interfaces
  */
@@ -602,7 +602,7 @@ export interface HandlerRegistries {
  * Represents a registry manager for handlers.
  * This framework provides handler registries for text commands, slash commands, context menu commands, buttons, modals, select menus, and client events.
  * Plugins can also create their own registries for custom handlers implementing the {@link HandlerRegistry} interface.
- * 
+ *
  * The registry manager is accessible through the container object: `container.handlers`
  *
  * @since 0.2.6
@@ -613,7 +613,7 @@ export interface HandlerRegistries {
  * await container.handlers.loadHandlerExports(
  *   new URL('handlers/', import.meta.url).pathname
  * );
- * 
+ *
  * // Get a specific registry
  * const slashCommands = container.handlers.getRegistry('slashCommands');
  * ```
@@ -672,7 +672,7 @@ export class HandlerRegistryManager {
     /**
      * Loads handler exports from a directory.
      * This is the recommended way to load handlers into your bot.
-     * 
+     *
      * @since 0.2.6
      * @param dir - The directory to load handler exports from
      * @param recursive - Whether to recursively load handler exports from subdirectories
@@ -711,7 +711,7 @@ export class HandlerRegistryManager {
  * @internal This is an internal function and should not be used directly.
  * @since 0.2.6
  */
-export const registerBuiltInHandlerRegistries = (manager: HandlerRegistryManager) => {
+export const _registerBuiltInHandlerRegistries = (manager: HandlerRegistryManager) => {
     manager.registerRegistry(new TextCommandRegistry());
     manager.registerRegistry(new SlashCommandRegistry());
     manager.registerRegistry(new ContextMenuCommandRegistry());
