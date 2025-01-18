@@ -1,7 +1,7 @@
 {
   "name": "@peridotjs/plugin-tasks",
   "description": "",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "author": "Jakob Helgesson",
   "dependencies": {
     "@sapphire/utilities": "^3.18.1",
