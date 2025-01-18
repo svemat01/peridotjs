@@ -1,68 +1,68 @@
 {
-    "name": "@peridotjs/framework",
-    "description": "",
-    "version": "0.2.7",
-    "author": "Jakob Helgesson",
-    "dependencies": {
-        "@sapphire/discord.js-utilities": "^7.3.2",
-        "@sapphire/lexure": "^1.1.10",
-        "@sapphire/result": "^2.7.2",
-        "@sapphire/stopwatch": "^1.5.4",
-        "@sapphire/utilities": "^3.18.1"
+  "name": "@peridotjs/framework",
+  "description": "",
+  "version": "0.2.7",
+  "author": "Jakob Helgesson",
+  "dependencies": {
+    "@sapphire/discord.js-utilities": "^7.3.2",
+    "@sapphire/lexure": "^1.1.10",
+    "@sapphire/result": "^2.7.2",
+    "@sapphire/stopwatch": "^1.5.4",
+    "@sapphire/utilities": "^3.18.1"
+  },
+  "devDependencies": {
+    "@discordjs/docgen": "^0.12.1",
+    "@eslint/js": "^9.17.0",
+    "@peridotjs/base": "workspace:*",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^20.12.12",
+    "eslint": "^9.17.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.19.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
     },
-    "devDependencies": {
-        "@discordjs/docgen": "^0.12.1",
-        "@eslint/js": "^9.17.0",
-        "@peridotjs/base": "workspace:*",
-        "@types/eslint__js": "^8.42.3",
-        "@types/node": "^20.12.12",
-        "eslint": "^9.17.0",
-        "eslint-plugin-simple-import-sort": "^12.1.1",
-        "eslint-plugin-unused-imports": "^4.1.4",
-        "prettier": "^3.4.2",
-        "typescript": "^5.7.2",
-        "typescript-eslint": "^8.19.0"
-    },
-    "exports": {
-        ".": {
-            "types": "./dist/src/index.d.ts",
-            "import": "./dist/src/index.js"
-        },
-        "./*": {
-            "types": "./dist/src/*.d.ts",
-            "import": "./dist/src/*.js"
-        }
-    },
-    "files": [
-        "dist/src",
-        "README.md",
-        "CHANGELOG.md",
-        "package.json"
-    ],
-    "keywords": [],
-    "license": "MIT",
-    "madge": {
-        "detectiveOptions": {
-            "ts": {
-                "skipTypeImports": true
-            }
-        }
-    },
-    "main": "dist/src/index.js",
-    "peerDependencies": {
-        "discord.js": "^14.17.2",
-        "i18next": "^23.11.4",
-        "pino": "^9.1.0"
-    },
-    "private": false,
-    "publishConfig": {
-        "access": "public"
-    },
-    "scripts": {
-        "build": "tsc -p tsconfig.json",
-        "typecheck": "tsc --noEmit",
-        "lint": "eslint",
-        "format": "prettier --write ."
-    },
-    "type": "module"
+    "./*": {
+      "types": "./dist/src/*.d.ts",
+      "import": "./dist/src/*.js"
+    }
+  },
+  "files": [
+    "dist/src",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "madge": {
+    "detectiveOptions": {
+      "ts": {
+        "skipTypeImports": true
+      }
+    }
+  },
+  "main": "dist/src/index.js",
+  "peerDependencies": {
+    "discord.js": "^14.17.2",
+    "i18next": "^23.11.4",
+    "pino": "^9.1.0"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint",
+    "format": "prettier --write ."
+  },
+  "type": "module"
 }
